@@ -44,6 +44,7 @@ function createEventSchema(custom) {
       colour: Joi.string().allow(""),
       ...joiFromCustom(custom),
     })
+    .unknown()
     .and("latitude", "longitude")
     .or("date", "latitude");
 }

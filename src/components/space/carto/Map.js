@@ -110,7 +110,7 @@ class Map extends React.Component {
       !process.env.MAPBOX_TOKEN ||
       process.env.MAPBOX_TOKEN === defaultToken
     ) {
-      return "https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png";
+      return "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
     }
 
     if (supportedMapboxMap.indexOf(this.props.ui.tiles) !== -1) {

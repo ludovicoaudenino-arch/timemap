@@ -8,28 +8,25 @@ function BottomActions(props) {
   function renderToggles() {
     return (
       <>
-        <div className="bottom-action-block">
-          {props.features.USE_SITES ? (
+        {props.features.USE_SITES ? (
+          <div className="bottom-action-block">
             <SitesIcon
               isActive={props.sites.enabled}
               onClickHandler={props.sites.toggle}
             />
-          ) : null}
-        </div>
-        ,
-        <div className="botttom-action-block">
+          </div>
+        ) : null}
+        <div className="bottom-action-block">
           <InfoIcon
             isActive={props.info.enabled}
             onClickHandler={props.info.toggle}
           />
         </div>
-        ,
-        <div className="botttom-action-block">
-          {props.features.USE_COVER ? (
+        {props.features.USE_COVER ? (
+          <div className="bottom-action-block">
             <CoverIcon onClickHandler={props.cover.toggle} />
-          ) : null}
-        </div>
-        ,
+          </div>
+        ) : null}
       </>
     );
   }

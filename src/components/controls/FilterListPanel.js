@@ -11,7 +11,7 @@ import {
 function getFiltersToToggle(filter, activeFilters) {
   const [key, children] = filter;
   // base case: no children to recurse through
-  if (children === {}) return [key];
+  if (!children || Object.keys(children).length === 0) return [key];
 
   const turningOff = activeFilters.includes(key);
   const childKeys = Object.entries(children)

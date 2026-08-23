@@ -152,16 +152,23 @@ export function getImmediateFilterParent(filter) {
  */
 export function getFilterSiblings(allFilters, filterParent, filterKey) {
   function findSiblings(filterPathObj, ancestors) {
-    if (ancestors.length === 0 || filterPathObj === {}) return {};
+    if (
+      !filterPathObj ||
+      Object.keys(filterPathObj).length === 0 ||
+      ancestors.length === 0
+    ) {
+      return {};
+    }
     const nextAncestor = ancestors.shift();
     if (Object.keys(filterPathObj).includes(nextAncestor)) {
       const nextObjToSearch = filterPathObj[nextAncestor];
       if (ancestors.length === 0) {
-        return nextObjToSearch;
+        return nextObjToSearch || {};
       } else {
         return findSiblings(nextObjToSearch, ancestors);
       }
     }
+    return {};
   }
   const aggregatedFilters = aggregateFilterPaths(allFilters);
   const ancestors = getFilterAncestors(filterKey);

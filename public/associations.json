@@ -1,0 +1,56 @@
+[
+  {
+    "id": "Connection",
+    "title": "Connection",
+    "desc": "Eventi di connessione (Open/Closed)",
+    "mode": "CATEGORY",
+    "filter_paths": [
+      "default"
+    ]
+  },
+  {
+    "id": "Fingerprint",
+    "title": "Fingerprint",
+    "desc": "Identificazione client SSH e KEX",
+    "mode": "CATEGORY",
+    "filter_paths": [
+      "default"
+    ]
+  },
+  {
+    "id": "Authentication",
+    "title": "Authentication",
+    "desc": "Tentativi di login (successo/fallimento)",
+    "mode": "CATEGORY",
+    "filter_paths": [
+      "default"
+    ]
+  },
+  {
+    "id": "Command",
+    "title": "Command",
+    "desc": "Comandi eseguiti nella shell interattiva",
+    "mode": "CATEGORY",
+    "filter_paths": [
+      "default"
+    ]
+  },
+  {
+    "id": "Malware",
+    "title": "Malware",
+    "desc": "Download e upload di file",
+    "mode": "CATEGORY",
+    "filter_paths": [
+      "default"
+    ]
+  },
+  {
+    "id": "General",
+    "title": "General",
+    "desc": "Altri eventi honeypot e chiusura sessioni log",
+    "mode": "CATEGORY",
+    "filter_paths": [
+      "default"
+    ]
+  }
+]
