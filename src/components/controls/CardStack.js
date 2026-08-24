@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { generateCardLayout, Card } from "./Card";
+import SessionCard from "./SessionCard";
 
 import * as selectors from "../../selectors";
 import { getFilterIdxFromColorSet } from "../../common/utilities";
@@ -105,8 +106,12 @@ class CardStack extends React.Component {
     return this.renderCards(showing, selections);
   }
 
-  renderCardStackHeader() {
-    const headerLang = copy[this.props.language].cardstack.header;
+  renderCardStackHeader(label) {
+    const cardstackLang = copy[this.props.language].cardstack;
+    const headerCopy =
+      label !== undefined
+        ? label
+        : `${this.props.selected.length} ${cardstackLang.header}`;
 
     return (
       <div
@@ -117,9 +122,7 @@ class CardStack extends React.Component {
         <button className="side-menu-burg is-active">
           <span />
         </button>
-        <p className="header-copy top">
-          {`${this.props.selected.length} ${headerLang}`}
-        </p>
+        <p className="header-copy top">{headerCopy}</p>
       </div>
     );
   }
@@ -145,7 +148,27 @@ class CardStack extends React.Component {
   }
 
   render() {
-    const { isCardstack, selected, narrative } = this.props;
+    const { isCardstack, selected, narrative, features, selectedSession } =
+      this.props;
+
+    // Session-aggregated mode: one card telling the story of one attack.
+    if (features.SESSION_AGGREGATION && selectedSession && !narrative) {
+      const cardstackLang = copy[this.props.language].cardstack;
+      return (
+        <div
+          id="card-stack"
+          className={`card-stack session-mode ${isCardstack ? "" : " folded"}`}
+        >
+          {this.renderCardStackHeader(
+            `${cardstackLang.session_header} · ${selectedSession.stats.eventCount} ${cardstackLang.header}`
+          )}
+          <div id="card-stack-content" className="card-stack-content">
+            <SessionCard session={selectedSession} />
+          </div>
+        </div>
+      );
+    }
+
     if (selected.length > 0) {
       if (!narrative) {
         return (
@@ -178,6 +201,7 @@ class CardStack extends React.Component {
 function mapStateToProps(state) {
   return {
     narrative: selectors.selectActiveNarrative(state),
+    selectedSession: selectors.selectSelectedSession(state),
     selected: selectors.selectSelected(state),
     sourceError: state.app.errors.source,
     language: state.app.language,

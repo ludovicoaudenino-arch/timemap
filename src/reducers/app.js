@@ -5,6 +5,7 @@ import { toggleFlagAC } from "../common/utilities";
 import {
   UPDATE_HIGHLIGHTED,
   UPDATE_SELECTED,
+  UPDATE_SELECTED_SESSION,
   UPDATE_COLORING_SET,
   UPDATE_TICKS,
   CLEAR_FILTER,
@@ -54,6 +55,12 @@ function updateTicks(appState, action) {
 function updateSelected(appState, action) {
   return Object.assign({}, appState, {
     selected: action.selected,
+  });
+}
+
+function updateSelectedSession(appState, action) {
+  return Object.assign({}, appState, {
+    selectedSessionId: action.selectedSessionId,
   });
 }
 
@@ -308,6 +315,8 @@ function app(appState = initial.app, action) {
       return updateHighlighted(appState, action);
     case UPDATE_SELECTED:
       return updateSelected(appState, action);
+    case UPDATE_SELECTED_SESSION:
+      return updateSelectedSession(appState, action);
     case UPDATE_COLORING_SET:
       return updateColoringSet(appState, action);
     case UPDATE_TICKS:

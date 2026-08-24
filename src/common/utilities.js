@@ -200,7 +200,7 @@ export function removeFromColoringSet(coloringSet, filters) {
 }
 
 export function getEventCategories(event, activeCategories) {
-  const eventCats = event.associations.filter(
+  const eventCats = (event.associations || []).filter(
     (a) => a.mode === ASSOCIATION_MODES.CATEGORY
   );
   return eventCats.reduce((acc, val) => {

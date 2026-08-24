@@ -52,5 +52,485 @@
     "filter_paths": [
       "default"
     ]
+  },
+  {
+    "id": "cowrie.client.version",
+    "title": "Client Version",
+    "desc": "Banner identificativo inviato dal client (es. SSH-2.0-OpenSSH)",
+    "mode": "FILTER",
+    "filter_paths": [
+      "client",
+      "version"
+    ]
+  },
+  {
+    "id": "cowrie.client.kex",
+    "title": "Client KEX",
+    "desc": "Proposta di Key Exchange crittografica e calcolo HASSH",
+    "mode": "FILTER",
+    "filter_paths": [
+      "client",
+      "kex"
+    ]
+  },
+  {
+    "id": "cowrie.client.fingerprint",
+    "title": "Client Fingerprint",
+    "desc": "Fingerprint della chiave pubblica del client",
+    "mode": "FILTER",
+    "filter_paths": [
+      "client",
+      "fingerprint"
+    ]
+  },
+  {
+    "id": "cowrie.client.size",
+    "title": "Client Size",
+    "desc": "Dimensioni della finestra TTY (righe e colonne del terminale)",
+    "mode": "FILTER",
+    "filter_paths": [
+      "client",
+      "size"
+    ]
+  },
+  {
+    "id": "cowrie.client.var",
+    "title": "Client Var",
+    "desc": "Variabili d'ambiente passate dal client (SSH env vars)",
+    "mode": "FILTER",
+    "filter_paths": [
+      "client",
+      "var"
+    ]
+  },
+  {
+    "id": "cowrie.client.malformed_packet",
+    "title": "Malformed Packet",
+    "desc": "Ricezione di pacchetti SSH corrotti o non conformi allo standard",
+    "mode": "FILTER",
+    "filter_paths": [
+      "client",
+      "malformed_packet"
+    ]
+  },
+  {
+    "id": "cowrie.session.connect",
+    "title": "Session Connect",
+    "desc": "Apertura connessione TCP (IP sorgente/destinazione, porta, protocollo)",
+    "mode": "FILTER",
+    "filter_paths": [
+      "session",
+      "connect"
+    ]
+  },
+  {
+    "id": "cowrie.session.closed",
+    "title": "Session Closed",
+    "desc": "Chiusura della connessione e durata complessiva",
+    "mode": "FILTER",
+    "filter_paths": [
+      "session",
+      "closed"
+    ]
+  },
+  {
+    "id": "cowrie.session.params",
+    "title": "Session Params",
+    "desc": "Parametri aggiuntivi di sessione negoziati",
+    "mode": "FILTER",
+    "filter_paths": [
+      "session",
+      "params"
+    ]
+  },
+  {
+    "id": "cowrie.session.input",
+    "title": "Session Input",
+    "desc": "Input grezzo da tastiera / stream di byte",
+    "mode": "FILTER",
+    "filter_paths": [
+      "session",
+      "input"
+    ]
+  },
+  {
+    "id": "cowrie.session.file_download",
+    "title": "File Download",
+    "desc": "Download di un payload/malware completato con successo (URL, hash SHA256)",
+    "mode": "FILTER",
+    "filter_paths": [
+      "session",
+      "file_download"
+    ]
+  },
+  {
+    "id": "cowrie.session.file_download.failed",
+    "title": "File Download Failed",
+    "desc": "Tentativo di download malware fallito o interrotto",
+    "mode": "FILTER",
+    "filter_paths": [
+      "session",
+      "file_download",
+      "failed"
+    ]
+  },
+  {
+    "id": "cowrie.session.file_upload",
+    "title": "File Upload",
+    "desc": "File caricato dall'attaccante via SCP/SFTP",
+    "mode": "FILTER",
+    "filter_paths": [
+      "session",
+      "file_upload"
+    ]
+  },
+  {
+    "id": "cowrie.login.failed",
+    "title": "Login Failed",
+    "desc": "Tentativo di autenticazione fallito (username, password)",
+    "mode": "FILTER",
+    "filter_paths": [
+      "login",
+      "failed"
+    ]
+  },
+  {
+    "id": "cowrie.login.success",
+    "title": "Login Success",
+    "desc": "Login simulato con successo (accesso concesso alla finta shell)",
+    "mode": "FILTER",
+    "filter_paths": [
+      "login",
+      "success"
+    ]
+  },
+  {
+    "id": "cowrie.command.input",
+    "title": "Command Input",
+    "desc": "Comando shell inviato ed eseguito dal bot/attaccante",
+    "mode": "FILTER",
+    "filter_paths": [
+      "command",
+      "input"
+    ]
+  },
+  {
+    "id": "cowrie.command.success",
+    "title": "Command Success",
+    "desc": "Comando emulato ed eseguito correttamente dall'ambiente HoneyFS",
+    "mode": "FILTER",
+    "filter_paths": [
+      "command",
+      "success"
+    ]
+  },
+  {
+    "id": "cowrie.command.failed",
+    "title": "Command Failed",
+    "desc": "Comando non riconosciuto o non supportato dal finto ambiente",
+    "mode": "FILTER",
+    "filter_paths": [
+      "command",
+      "failed"
+    ]
+  },
+  {
+    "id": "cowrie.command.chpasswd",
+    "title": "Change Password",
+    "desc": "Tentativo dell'attaccante di cambiare password utente nel sistema",
+    "mode": "FILTER",
+    "filter_paths": [
+      "command",
+      "chpasswd"
+    ]
+  },
+  {
+    "id": "cowrie.direct-tcpip.request",
+    "title": "Tunnel Request",
+    "desc": "Richiesta di apertura di un tunnel TCP verso un host remoto",
+    "mode": "FILTER",
+    "filter_paths": [
+      "direct-tcpip",
+      "request"
+    ]
+  },
+  {
+    "id": "cowrie.direct-tcpip.data",
+    "title": "Tunnel Data",
+    "desc": "Dati in transito attraverso il canale di tunneling",
+    "mode": "FILTER",
+    "filter_paths": [
+      "direct-tcpip",
+      "data"
+    ]
+  },
+  {
+    "id": "cowrie.direct-tcpip.tunnel",
+    "title": "Tunnel Active",
+    "desc": "Creazione ed evento di tunnel attivo",
+    "mode": "FILTER",
+    "filter_paths": [
+      "direct-tcpip",
+      "tunnel"
+    ]
+  },
+  {
+    "id": "cowrie.direct-tcpip.redirect",
+    "title": "Tunnel Redirect",
+    "desc": "Reindirizzamento del traffico verso un proxy/sinkhole",
+    "mode": "FILTER",
+    "filter_paths": [
+      "direct-tcpip",
+      "redirect"
+    ]
+  },
+  {
+    "id": "cowrie.direct-tcpip.ja4",
+    "title": "JA4 Fingerprint",
+    "desc": "Fingerprint di rete JA4 per il traffico TCP/TLS",
+    "mode": "FILTER",
+    "filter_paths": [
+      "direct-tcpip",
+      "ja4"
+    ]
+  },
+  {
+    "id": "cowrie.direct-tcpip.ja4h",
+    "title": "JA4H Fingerprint",
+    "desc": "Fingerprint di rete JA4H per il traffico HTTP proxato",
+    "mode": "FILTER",
+    "filter_paths": [
+      "direct-tcpip",
+      "ja4h"
+    ]
+  },
+  {
+    "id": "cowrie.telnet.option",
+    "title": "Telnet Option",
+    "desc": "Negoziazione opzioni e flag del protocollo Telnet",
+    "mode": "FILTER",
+    "filter_paths": [
+      "telnet",
+      "option"
+    ]
+  },
+  {
+    "id": "cowrie.telnet.exploit_attempt",
+    "title": "Telnet Exploit Attempt",
+    "desc": "Tentativo di exploit di vulnerabilità Telnet note",
+    "mode": "FILTER",
+    "filter_paths": [
+      "telnet",
+      "exploit_attempt"
+    ]
+  },
+  {
+    "id": "cowrie.telnet.exploit_success",
+    "title": "Telnet Exploit Success",
+    "desc": "Exploit Telnet simulato con successo",
+    "mode": "FILTER",
+    "filter_paths": [
+      "telnet",
+      "exploit_success"
+    ]
+  },
+  {
+    "id": "cowrie.telnet.error",
+    "title": "Telnet Error",
+    "desc": "Errore interno durante la sessione Telnet",
+    "mode": "FILTER",
+    "filter_paths": [
+      "telnet",
+      "error"
+    ]
+  },
+  {
+    "id": "cowrie.proxy.backend_connected",
+    "title": "Backend Connected",
+    "desc": "Connessione stabilita con la VM Linux reale sacrificabile",
+    "mode": "FILTER",
+    "filter_paths": [
+      "proxy",
+      "backend_connected"
+    ]
+  },
+  {
+    "id": "cowrie.proxy.backend_disconnected",
+    "title": "Backend Disconnected",
+    "desc": "Disconnessione dalla VM reale backend",
+    "mode": "FILTER",
+    "filter_paths": [
+      "proxy",
+      "backend_disconnected"
+    ]
+  },
+  {
+    "id": "cowrie.proxy.backend_connect_error",
+    "title": "Backend Connect Error",
+    "desc": "Errore nel raggiungere la VM backend",
+    "mode": "FILTER",
+    "filter_paths": [
+      "proxy",
+      "backend_connect_error"
+    ]
+  },
+  {
+    "id": "cowrie.proxy.client_disconnect",
+    "title": "Proxy Client Disconnect",
+    "desc": "Disconnessione del client dal proxy",
+    "mode": "FILTER",
+    "filter_paths": [
+      "proxy",
+      "client_disconnect"
+    ]
+  },
+  {
+    "id": "cowrie.proxy.ssh",
+    "title": "Proxy SSH",
+    "desc": "Sessione SSH proxata in modalità Man-in-the-Middle",
+    "mode": "FILTER",
+    "filter_paths": [
+      "proxy",
+      "ssh"
+    ]
+  },
+  {
+    "id": "cowrie.reversedns.connect",
+    "title": "Reverse DNS Connect",
+    "desc": "Hostname associato all'IP sorgente tramite Reverse DNS Lookup",
+    "mode": "FILTER",
+    "filter_paths": [
+      "reversedns",
+      "connect"
+    ]
+  },
+  {
+    "id": "cowrie.reversedns.forward",
+    "title": "Forward-Confirmed DNS",
+    "desc": "Validazione Forward-Confirmed Reverse DNS (FCrDNS)",
+    "mode": "FILTER",
+    "filter_paths": [
+      "reversedns",
+      "forward"
+    ]
+  },
+  {
+    "id": "cowrie.virustotal.scanfile",
+    "title": "VirusTotal Scan File",
+    "desc": "Invio e scansione dell'hash del malware su VirusTotal",
+    "mode": "FILTER",
+    "filter_paths": [
+      "threat-intel",
+      "virustotal",
+      "scanfile"
+    ]
+  },
+  {
+    "id": "cowrie.virustotal.scanurl",
+    "title": "VirusTotal Scan URL",
+    "desc": "Scansione dell'URL di download su VirusTotal",
+    "mode": "FILTER",
+    "filter_paths": [
+      "threat-intel",
+      "virustotal",
+      "scanurl"
+    ]
+  },
+  {
+    "id": "cowrie.abuseipdb.started",
+    "title": "AbuseIPDB Started",
+    "desc": "Inizializzazione del modulo di reportistica AbuseIPDB",
+    "mode": "FILTER",
+    "filter_paths": [
+      "threat-intel",
+      "abuseipdb",
+      "started"
+    ]
+  },
+  {
+    "id": "cowrie.abuseipdb.reportedip",
+    "title": "AbuseIPDB Reported IP",
+    "desc": "Segnalazione dell'IP attaccante inviata con successo",
+    "mode": "FILTER",
+    "filter_paths": [
+      "threat-intel",
+      "abuseipdb",
+      "reportedip"
+    ]
+  },
+  {
+    "id": "cowrie.abuseipdb.reportfail",
+    "title": "AbuseIPDB Report Failed",
+    "desc": "Fallimento nell'invio della segnalazione ad AbuseIPDB",
+    "mode": "FILTER",
+    "filter_paths": [
+      "threat-intel",
+      "abuseipdb",
+      "reportfail"
+    ]
+  },
+  {
+    "id": "cowrie.abuseipdb.ratelimited",
+    "title": "AbuseIPDB Rate Limited",
+    "desc": "Raggiungimento del limite di chiamate API (Rate Limit)",
+    "mode": "FILTER",
+    "filter_paths": [
+      "threat-intel",
+      "abuseipdb",
+      "ratelimited"
+    ]
+  },
+  {
+    "id": "cowrie.abuseipdb.wakeup",
+    "title": "AbuseIPDB Wakeup",
+    "desc": "Ripresa dell'invio segnalazioni dopo il rate limit",
+    "mode": "FILTER",
+    "filter_paths": [
+      "threat-intel",
+      "abuseipdb",
+      "wakeup"
+    ]
+  },
+  {
+    "id": "cowrie.urlhaus.submitted",
+    "title": "URLhaus Submitted",
+    "desc": "URL malevolo inviato al database malware di URLhaus",
+    "mode": "FILTER",
+    "filter_paths": [
+      "threat-intel",
+      "urlhaus",
+      "submitted"
+    ]
+  },
+  {
+    "id": "cowrie.greynoise.result",
+    "title": "GreyNoise Result",
+    "desc": "Classificazione dell'IP su GreyNoise (scanner benigno vs bot malevolo)",
+    "mode": "FILTER",
+    "filter_paths": [
+      "threat-intel",
+      "greynoise",
+      "result"
+    ]
+  },
+  {
+    "id": "cowrie.log.open",
+    "title": "Log Open",
+    "desc": "Apertura di un nuovo file di log TTY o di sessione",
+    "mode": "FILTER",
+    "filter_paths": [
+      "log",
+      "open"
+    ]
+  },
+  {
+    "id": "cowrie.log.closed",
+    "title": "Log Closed",
+    "desc": "Chiusura e salvataggio del file di log TTY",
+    "mode": "FILTER",
+    "filter_paths": [
+      "log",
+      "closed"
+    ]
   }
 ]

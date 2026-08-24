@@ -190,6 +190,14 @@ export function updateSelected(selected) {
   };
 }
 
+export const UPDATE_SELECTED_SESSION = "UPDATE_SELECTED_SESSION";
+export function updateSelectedSession(selectedSessionId) {
+  return {
+    type: UPDATE_SELECTED_SESSION,
+    selectedSessionId: selectedSessionId,
+  };
+}
+
 export const UPDATE_DISTRICT = "UPDATE_DISTRICT";
 export function updateDistrict(district) {
   return {

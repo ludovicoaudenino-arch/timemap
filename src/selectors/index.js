@@ -7,8 +7,14 @@ import {
   isLongitude,
   createFilterPathString,
 } from "../common/utilities";
-import { isTimeRangedIn } from "./helpers";
+import {
+  isTimeRangedIn,
+  isEventInActiveFilters,
+  isEventInActiveCategories,
+} from "./helpers";
 import { ASSOCIATION_MODES, SHAPE } from "../common/constants";
+
+export * from "./sessions";
 
 // Input selectors
 export const getEvents = (state) => state.domain.events;
@@ -92,23 +98,11 @@ export const selectEvents = createSelector(
     features
   ) => {
     return events.reduce((acc, event) => {
-      const isMatchingFilter =
-        (event.associations &&
-          event.associations
-            .filter((a) => a.mode === ASSOCIATION_MODES.FILTER)
-            .map((association) =>
-              activeFilters.includes(createFilterPathString(association))
-            )
-            .some((s) => s)) ||
-        activeFilters.length === 0;
-      const isActiveFilter = isMatchingFilter || activeFilters.length === 0;
-      const isActiveCategory =
-        (event.associations &&
-          event.associations
-            .filter((a) => a.mode === ASSOCIATION_MODES.CATEGORY)
-            .map((association) => activeCategories.includes(association.title))
-            .some((s) => s)) ||
-        activeCategories.length === 0;
+      const isActiveFilter = isEventInActiveFilters(event, activeFilters);
+      const isActiveCategory = isEventInActiveCategories(
+        event,
+        activeCategories
+      );
       let isActiveTime = isTimeRangedIn(event, timeRange);
       isActiveTime = features.GRAPH_NONLOCATED
         ? (!event.latitude && !event.longitude) || isActiveTime

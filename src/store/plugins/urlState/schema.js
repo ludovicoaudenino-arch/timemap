@@ -2,6 +2,7 @@ import {
   TOGGLE_ASSOCIATIONS,
   UPDATE_COLORING_SET,
   UPDATE_SELECTED,
+  UPDATE_SELECTED_SESSION,
   UPDATE_TIMERANGE,
 } from "../../../actions";
 import { ASSOCIATION_MODES } from "../../../common/constants";
@@ -54,6 +55,21 @@ export const SCHEMA = Object.freeze({
           nextState.domain.events.find((e) => e.id === id)
         );
       }
+    },
+  },
+  session: {
+    key: "session",
+    trigger: UPDATE_SELECTED_SESSION,
+    type: SCHEMA_TYPES.STRING,
+    dehydrate(state) {
+      return state.app.selectedSessionId;
+    },
+    rehydrate(nextState, { session }) {
+      if (!session) return;
+      nextState.app.selectedSessionId = session;
+      // keep `app.selected` in sync so the map and timeline markers highlight
+      const events = nextState.domain.events.filter((e) => e.civId === session);
+      if (events.length) nextState.app.selected = events;
     },
   },
   range: {

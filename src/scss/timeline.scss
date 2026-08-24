@@ -209,6 +209,19 @@
         fill: none;
       }
 
+      .timeline-session {
+        cursor: pointer;
+
+        .session-marker {
+          transition: r 0.12s ease, fill-opacity 0.12s ease;
+        }
+
+        &.hovered .session-marker {
+          stroke: $offwhite;
+          stroke-width: 1.5;
+        }
+      }
+
       .coevent {
         opacity: 0.7;
         cursor: pointer;

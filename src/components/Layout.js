@@ -34,6 +34,7 @@ class Dashboard extends React.Component {
     this.setNarrative = this.setNarrative.bind(this);
     this.setNarrativeFromFilters = this.setNarrativeFromFilters.bind(this);
     this.handleSelect = this.handleSelect.bind(this);
+    this.handleSelectSession = this.handleSelectSession.bind(this);
     this.getCategoryColor = this.getCategoryColor.bind(this);
     this.findEventIdx = this.findEventIdx.bind(this);
     this.onKeyDown = this.onKeyDown.bind(this);
@@ -118,6 +119,38 @@ class Dashboard extends React.Component {
     }
 
     this.props.actions.updateSelected(matchedEvents);
+  }
+
+  /**
+   * Select a whole Cowrie attack session. `app.selected` is populated with the
+   * session's events as well, so the map highlight, the timeline marker and
+   * the card stack header keep working unchanged.
+   */
+  handleSelectSession(sessionId) {
+    const { actions, sessions } = this.props;
+    const session = sessions.find((s) => s.id === sessionId);
+    if (!session) {
+      actions.updateSelectedSession(null);
+      actions.updateSelected([]);
+      return;
+    }
+    actions.updateSelectedSession(session.id);
+    actions.updateSelected(session.events);
+  }
+
+  clearSelection() {
+    this.props.actions.updateSelectedSession(null);
+    this.props.actions.updateSelected([]);
+  }
+
+  /** Move the session selection by `offset` places along the visible sessions. */
+  stepSession(offset) {
+    const { sessions, app } = this.props;
+    if (!sessions.length) return;
+    const idx = sessions.findIndex((s) => s.id === app.selectedSessionId);
+    const nextIdx = idx === -1 ? 0 : idx + offset;
+    if (nextIdx < 0 || nextIdx >= sessions.length) return;
+    this.handleSelectSession(sessions[nextIdx].id);
   }
 
   getCategoryColor(category) {
@@ -211,8 +244,24 @@ class Dashboard extends React.Component {
   }
 
   onKeyDown(e) {
-    const { narrative, selected } = this.props.app;
+    const { narrative, selected, selectedSessionId } = this.props.app;
     const { events } = this.props.domain;
+
+    if (this.props.features.SESSION_AGGREGATION && !narrative) {
+      if (!selectedSessionId) return;
+      switch (e.keyCode) {
+        case 37: // left arrow
+        case 38: // up arrow
+          this.stepSession(-1);
+          break;
+        case 39: // right arrow
+        case 40: // down arrow
+          this.stepSession(1);
+          break;
+        default:
+      }
+      return;
+    }
 
     const prev = (idx) => {
       if (narrative === null) {
@@ -358,6 +407,7 @@ class Dashboard extends React.Component {
             onSelect: app.associations.narrative
               ? this.selectNarrativeStep
               : (ev) => this.handleSelect(ev, 0),
+            onSelectSession: this.handleSelectSession,
             onUpdateTimerange: actions.updateTimeRange,
             getCategoryColor: this.getCategoryColor,
           }}
@@ -369,7 +419,7 @@ class Dashboard extends React.Component {
             app.associations.narrative ? this.selectNarrativeStep : () => null
           }
           onHighlight={this.handleHighlight}
-          onToggleCardstack={() => actions.updateSelected([])}
+          onToggleCardstack={() => this.clearSelection()}
           getCategoryColor={this.getCategoryColor}
         />
         <NarrativeControls
@@ -447,6 +497,7 @@ export default connect(
   (state) => ({
     ...state,
     narrativeIdx: selectors.selectNarrativeIdx(state),
+    sessions: selectors.selectVisibleSessions(state),
     narratives: selectors.selectNarratives(state),
     selected: selectors.selectSelected(state),
   }),

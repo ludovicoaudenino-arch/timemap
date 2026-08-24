@@ -1,6 +1,5 @@
 import React from "react";
 import colors from "../../../common/global";
-import hash from "object-hash";
 import {
   getEventCategories,
   isLatitude,
@@ -13,6 +12,8 @@ const TimelineMarkers = ({
   eventRadius,
   getEventX,
   getEventY,
+  // Ring size; overridden in session mode, where markers vary in size.
+  getMarkerRadius = () => eventRadius * 2,
   categories,
   transitionDuration,
   selected,
@@ -23,7 +24,7 @@ const TimelineMarkers = ({
     function renderCircle(y) {
       return (
         <circle
-          key={hash(event)}
+          key={`marker-${event.id}`}
           className="timeline-marker"
           cx={0}
           cy={0}
@@ -38,7 +39,7 @@ const TimelineMarkers = ({
             MozTransition: "none",
             opacity: 1,
           }}
-          r={eventRadius * 2}
+          r={getMarkerRadius(event)}
         />
       );
     }

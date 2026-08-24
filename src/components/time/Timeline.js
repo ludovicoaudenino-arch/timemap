@@ -15,6 +15,7 @@ import Handles from "./atoms/Handles.js";
 import ZoomControls from "./atoms/ZoomControls.js";
 import Markers from "./atoms/Markers.js";
 import Events from "./atoms/Events.js";
+import Sessions, { getSessionRadius } from "./atoms/Sessions.js";
 import Categories from "./Categories";
 
 class Timeline extends React.Component {
@@ -25,6 +26,7 @@ class Timeline extends React.Component {
     this.getY = this.getY.bind(this);
     this.onApplyZoom = this.onApplyZoom.bind(this);
     this.onSelect = this.onSelect.bind(this);
+    this.onSelectSession = this.onSelectSession.bind(this);
     this.onDragStart = this.onDragStart.bind(this);
     this.onDrag = this.onDrag.bind(this);
     this.onDragEnd = this.onDragEnd.bind(this);
@@ -346,6 +348,23 @@ class Timeline extends React.Component {
     return [null, null];
   }
 
+  onSelectSession(sessionId) {
+    if (this.props.features.ZOOM_TO_TIMEFRAME_ON_TIMELINE_CLICK) {
+      const marker = this.props.domain.sessions.find((s) => s.id === sessionId);
+      if (marker) {
+        const timeframe = Math.floor(
+          this.props.features.ZOOM_TO_TIMEFRAME_ON_TIMELINE_CLICK / 2
+        );
+        this.props.actions.updateTicks(1);
+        this.props.methods.onUpdateTimerange([
+          timeMinute.offset(marker.startDatetime, -timeframe),
+          timeMinute.offset(marker.startDatetime, timeframe),
+        ]);
+      }
+    }
+    this.props.methods.onSelectSession(sessionId);
+  }
+
   onSelect(event) {
     if (this.props.features.ZOOM_TO_TIMEFRAME_ON_TIMELINE_CLICK) {
       const timeframe = Math.floor(
@@ -360,7 +379,8 @@ class Timeline extends React.Component {
   }
 
   render() {
-    const { isNarrative, app, domain } = this.props;
+    const { isNarrative, app, domain, features, selectedSession } = this.props;
+    const isSessionMode = !!features.SESSION_AGGREGATION;
 
     let classes = `timeline-wrapper ${this.state.isFolded ? " folded" : ""}`;
     classes += app.narrative !== null ? " narrative-mode" : "";
@@ -374,10 +394,13 @@ class Timeline extends React.Component {
     const contentHeight = { height: dims.contentHeight };
     const { activeCategories: categories } = this.props;
 
-    const title = copy[this.props.app.language].timeline.info.replace(
-      "%n",
-      domain.eventCountInTimeRange
-    );
+    const lang = copy[this.props.app.language].timeline;
+    const title = isSessionMode
+      ? (lang.info_sessions || lang.info).replace(
+          "%n",
+          domain.sessionCountInTimeRange
+        )
+      : lang.info.replace("%n", domain.eventCountInTimeRange);
 
     return (
       <div
@@ -441,40 +464,65 @@ class Timeline extends React.Component {
               />
               <Markers
                 dims={dims}
-                selected={this.props.app.selected}
-                getEventX={(ev) => this.getDatetimeX(ev.datetime)}
+                selected={
+                  isSessionMode
+                    ? selectedSession
+                      ? [selectedSession]
+                      : []
+                    : this.props.app.selected
+                }
+                getEventX={(ev) =>
+                  this.getDatetimeX(
+                    isSessionMode ? ev.startDatetime : ev.datetime
+                  )
+                }
                 getEventY={this.getY}
+                getMarkerRadius={(ev) =>
+                  isSessionMode
+                    ? getSessionRadius(ev, this.props.ui.eventRadius) + 6
+                    : this.props.ui.eventRadius * 2
+                }
                 categories={categories}
                 transitionDuration={this.state.transitionDuration}
                 styles={this.props.ui.styles}
                 features={this.props.features}
                 eventRadius={this.props.ui.eventRadius}
               />
-              <Events
-                events={this.props.domain.events}
-                projects={this.props.domain.projects}
-                categories={categories}
-                styleDatetime={this.styleDatetime}
-                narrative={this.props.app.narrative}
-                getDatetimeX={this.getDatetimeX}
-                getY={this.getY}
-                getHighlights={(group) => {
-                  if (group === "None") {
-                    return [];
-                  }
-                  return categories.map((c) => c.group === group);
-                }}
-                getCategoryColor={this.props.methods.getCategoryColor}
-                transitionDuration={this.state.transitionDuration}
-                onSelect={this.onSelect}
-                dims={dims}
-                features={this.props.features}
-                setLoading={this.props.actions.setLoading}
-                setNotLoading={this.props.actions.setNotLoading}
-                eventRadius={this.props.ui.eventRadius}
-                filterColors={this.props.ui.filterColors}
-                coloringSet={this.props.app.coloringSet}
-              />
+              {isSessionMode ? (
+                <Sessions
+                  sessions={this.props.domain.sessions}
+                  getDatetimeX={this.getDatetimeX}
+                  getY={this.getY}
+                  onSelectSession={this.onSelectSession}
+                  eventRadius={this.props.ui.eventRadius}
+                />
+              ) : (
+                <Events
+                  events={this.props.domain.events}
+                  projects={this.props.domain.projects}
+                  categories={categories}
+                  styleDatetime={this.styleDatetime}
+                  narrative={this.props.app.narrative}
+                  getDatetimeX={this.getDatetimeX}
+                  getY={this.getY}
+                  getHighlights={(group) => {
+                    if (group === "None") {
+                      return [];
+                    }
+                    return categories.map((c) => c.group === group);
+                  }}
+                  getCategoryColor={this.props.methods.getCategoryColor}
+                  transitionDuration={this.state.transitionDuration}
+                  onSelect={this.onSelect}
+                  dims={dims}
+                  features={this.props.features}
+                  setLoading={this.props.actions.setLoading}
+                  setNotLoading={this.props.actions.setNotLoading}
+                  eventRadius={this.props.ui.eventRadius}
+                  filterColors={this.props.ui.filterColors}
+                  coloringSet={this.props.app.coloringSet}
+                />
+              )}
             </svg>
           </div>
         </div>
@@ -483,19 +531,32 @@ class Timeline extends React.Component {
   }
 }
 
+// `Timeline` hashes its entire props object on every update, so each mode
+// passes only the collection it actually draws.
+const NO_EVENTS = [];
+const NO_SESSIONS = [];
+
 function mapStateToProps(state) {
+  const isSessionMode = !!state.features.SESSION_AGGREGATION;
   return {
     dimensions: selectors.selectDimensions(state),
     isNarrative: !!state.app.associations.narrative,
     activeCategories: selectors.getActiveCategories(state),
+    selectedSession: isSessionMode
+      ? selectors.selectSelectedSessionMarker(state)
+      : null,
     domain: {
-      events: selectors.selectStackedEvents(state),
+      events: isSessionMode ? NO_EVENTS : selectors.selectStackedEvents(state),
+      sessions: isSessionMode
+        ? selectors.selectSessionMarkers(state)
+        : NO_SESSIONS,
       eventCountInTimeRange: selectors.selectEventCountInTimeRange(state),
+      sessionCountInTimeRange: selectors.selectSessionCountInTimeRange(state),
       projects: selectors.selectProjects(state),
       narratives: state.domain.narratives,
     },
     app: {
-      selected: state.app.selected,
+      selected: isSessionMode ? NO_EVENTS : state.app.selected,
       language: state.app.language,
       timeline: state.app.timeline,
       narrative: state.app.associations.narrative,
