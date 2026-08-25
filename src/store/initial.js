@@ -86,8 +86,8 @@ const initial = {
         contentHeight: isSmallLaptop ? 160 : 200,
         width_controls: 100,
       },
-      range: [new Date(2001, 2, 23, 12), new Date(2021, 2, 23, 12)],
-      rangeLimits: [new Date(1, 1, 1, 1), new Date()],
+      range: [new Date("2026-04-02T12:00:00"), new Date("2026-04-03T00:00:00")],
+      rangeLimits: [new Date("2000-01-01"), new Date("2030-01-01")],
       zoomLevels: copy[language].timeline.zoomLevels || [
         { label: "20 years", duration: 10512000 },
         { label: "2 years", duration: 1051200 },

@@ -5,11 +5,11 @@
   "homepage": ".",
   "private": true,
   "scripts": {
-    "dev": "node scripts/start.js",
-    "build": "NODE_ENV=production node scripts/build.js",
+    "dev": "node --openssl-legacy-provider scripts/start.js",
+    "build": "NODE_ENV=production node --openssl-legacy-provider scripts/build.js",
     "dev:wsl": "HOST=0.0.0.0 npm run dev",
-    "test": "node scripts/test.js --silent",
-    "test:ava": "NODE_ENV=production ava --verbose",
+    "test": "node --openssl-legacy-provider scripts/test.js --silent",
+    "test:ava": "NODE_ENV=production node --openssl-legacy-provider ./node_modules/ava/cli.js --verbose",
     "test-watch": "ava --watch",
     "lint": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "lint:fix": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\""

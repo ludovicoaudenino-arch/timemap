@@ -23,3 +23,7 @@ package-lock.json
 tags
 
 .env.local
+
+# Large datasets
+public/cowrie_by_session.json
+public/*.large.json
