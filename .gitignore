@@ -21,9 +21,9 @@ src/assets/fonts
 
 package-lock.json
 tags
-
+.*/
 .env.local
-
+/docs/cowrie-sessioni.md
 # Large datasets
 public/cowrie_by_session.json
 public/*.large.json

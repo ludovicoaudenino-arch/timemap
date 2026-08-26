@@ -56,6 +56,8 @@ export function validateDomain(domain, features) {
     sources: {},
     regions: [],
     shapes: [],
+    // Not validated: a plain { eventid: [field, ...] } lookup used for display
+    eventSchema: domain && domain.eventSchema ? domain.eventSchema : {},
     notifications: domain ? domain.notifications : null,
   };
 

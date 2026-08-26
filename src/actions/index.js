@@ -1,8 +1,10 @@
 import { urlFromEnv } from "../common/utilities";
+import { isSessionKeyedExport, sessionsToEvents } from "../common/cowrie";
 
 // TODO: relegate these URLs entirely to environment variables
 // const CONFIG_URL = urlFromEnv('CONFIG_EXT')
 const EVENT_DATA_URL = urlFromEnv("EVENTS_EXT");
+const EVENT_SCHEMA_URL = urlFromEnv("EVENT_SCHEMA_EXT");
 const ASSOCIATIONS_URL = urlFromEnv("ASSOCIATIONS_EXT");
 const SOURCES_URL = urlFromEnv("SOURCES_EXT");
 const SITES_URL = urlFromEnv("SITES_EXT");
@@ -34,14 +36,28 @@ export function fetchDomain() {
     //     .catch(() => handleError("Couldn't find data at the config URL you specified."))
     // }
 
-    // NB: EVENT_DATA_URL is a list, and so results are aggregated
+    // NB: EVENT_DATA_URL is a list, and so results are aggregated.
+    // A payload keyed by Cowrie `session` id is expanded into one domain event
+    // per attack session; a plain array is passed through untouched.
     const eventPromise = Promise.all(
       EVENT_DATA_URL.map((url) =>
         fetch(url)
           .then((response) => response.json())
+          .then((payload) =>
+            isSessionKeyedExport(payload) ? sessionsToEvents(payload) : payload
+          )
           .catch(() => handleError("events"))
       )
     ).then((results) => results.flatMap((t) => t));
+
+    // Cowrie's field list per eventid: the session card renders each event's
+    // fields in the order this schema declares them.
+    let eventSchemaPromise = Promise.resolve({});
+    if (EVENT_SCHEMA_URL) {
+      eventSchemaPromise = fetch(EVENT_SCHEMA_URL[0])
+        .then((response) => response.json())
+        .catch(() => handleError(domainMsg("the Cowrie event schema")));
+    }
 
     let associationsPromise = Promise.resolve([]);
     if (features.USE_ASSOCIATIONS) {
@@ -101,6 +117,7 @@ export function fetchDomain() {
       sitesPromise,
       regionsPromise,
       shapesPromise,
+      eventSchemaPromise,
     ])
       .then((response) => {
         const result = {
@@ -110,6 +127,7 @@ export function fetchDomain() {
           sites: response[3],
           regions: response[4],
           shapes: response[5],
+          eventSchema: response[6],
           notifications,
         };
         if (
@@ -187,14 +205,6 @@ export function updateSelected(selected) {
   return {
     type: UPDATE_SELECTED,
     selected: selected,
-  };
-}
-
-export const UPDATE_SELECTED_SESSION = "UPDATE_SELECTED_SESSION";
-export function updateSelectedSession(selectedSessionId) {
-  return {
-    type: UPDATE_SELECTED_SESSION,
-    selectedSessionId: selectedSessionId,
   };
 }
 

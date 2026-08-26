@@ -147,12 +147,25 @@ class CardStack extends React.Component {
     );
   }
 
-  render() {
-    const { isCardstack, selected, narrative, features, selectedSession } =
-      this.props;
+  /**
+   * Session-aggregated mode: every selected event is one Cowrie attack
+   * session, so the stack is a stack of raw session logs.
+   */
+  renderSessionCards(sessions) {
+    return sessions.map((event) => (
+      <SessionCard
+        key={event.session.id}
+        session={event.session}
+        eventSchema={this.props.eventSchema}
+      />
+    ));
+  }
 
-    // Session-aggregated mode: one card telling the story of one attack.
-    if (features.SESSION_AGGREGATION && selectedSession && !narrative) {
+  render() {
+    const { isCardstack, selected, narrative, features } = this.props;
+
+    const sessions = selected.filter((event) => event && event.session);
+    if (features.SESSION_AGGREGATION && sessions.length > 0 && !narrative) {
       const cardstackLang = copy[this.props.language].cardstack;
       return (
         <div
@@ -160,10 +173,14 @@ class CardStack extends React.Component {
           className={`card-stack session-mode ${isCardstack ? "" : " folded"}`}
         >
           {this.renderCardStackHeader(
-            `${cardstackLang.session_header} · ${selectedSession.stats.eventCount} ${cardstackLang.header}`
+            `${sessions.length} ${
+              sessions.length === 1
+                ? cardstackLang.session_header
+                : cardstackLang.session_header_plural
+            }`
           )}
           <div id="card-stack-content" className="card-stack-content">
-            <SessionCard session={selectedSession} />
+            {this.renderSessionCards(sessions)}
           </div>
         </div>
       );
@@ -201,8 +218,8 @@ class CardStack extends React.Component {
 function mapStateToProps(state) {
   return {
     narrative: selectors.selectActiveNarrative(state),
-    selectedSession: selectors.selectSelectedSession(state),
     selected: selectors.selectSelected(state),
+    eventSchema: selectors.getEventSchema(state),
     sourceError: state.app.errors.source,
     language: state.app.language,
     isCardstack: state.app.flags.isCardstack,

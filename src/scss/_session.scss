@@ -1,12 +1,18 @@
-// Cowrie attack-session card, shown in the card stack when SESSION_AGGREGATION
-// is on. One card = one session_id, with its chronology in collapsible phases.
+// Cowrie attack-session card: one card = one session_id, laid out as raw log.
+// One section per Cowrie eventid, one row per Cowrie field. Nothing in here
+// carries copy of its own: all the text comes from the log.
 
 $session-mono: "SFMono-Regular", Menlo, Consolas, monospace;
-$session-time-width: 58px;
+$session-key-width: 88px;
+$session-rule: rgba(255, 255, 255, 0.1);
 
 .card-stack.session-mode {
   .card-stack-content {
     padding: 0;
+  }
+
+  .session-card + .session-card {
+    margin-top: 6px;
   }
 }
 
@@ -20,237 +26,196 @@ $session-time-width: 58px;
   code {
     font-family: $session-mono;
     font-size: $small;
-    background: rgba(255, 255, 255, 0.08);
+    line-height: 1.45;
+    background: rgba(255, 255, 255, 0.07);
     border-radius: 2px;
     padding: 1px 4px;
-    word-break: break-all;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
   }
 }
+
+/* ---------------------------------------------------------------- header */
 
 .session-card-header {
   padding: 12px 14px 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid $session-rule;
 }
 
-.session-card-title {
+.session-card-id {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
+  margin-bottom: 8px;
 
   .session-id {
-    font-size: $large;
+    font-size: $xlarge;
     background: none;
     padding: 0;
-    letter-spacing: 0.04em;
-  }
-
-  .session-ip {
-    font-family: $session-mono;
-    font-size: $normal;
-    color: $midwhite;
-  }
-}
-
-.session-card-subtitle {
-  margin-top: 4px;
-  font-size: $small;
-  color: $midwhite;
-
-  .session-dot {
-    margin: 0 6px;
-    opacity: 0.6;
-  }
-}
-
-.session-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 10px;
-}
-
-.session-badge {
-  display: inline-block;
-  padding: 2px 7px;
-  border-radius: 10px;
-  font-size: $xsmall;
-  line-height: 1.5;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-  border: 1px solid transparent;
-
-  &--neutral {
-    background: rgba(255, 255, 255, 0.09);
-    color: $lightwhite;
-    border-color: rgba(255, 255, 255, 0.16);
-  }
-
-  &--success {
-    background: rgba(46, 204, 113, 0.16);
-    color: #6ee7a0;
-    border-color: rgba(46, 204, 113, 0.5);
-  }
-
-  &--warning {
-    background: rgba(243, 156, 18, 0.16);
-    color: #f5b44d;
-    border-color: rgba(243, 156, 18, 0.5);
-  }
-
-  &--danger {
-    background: rgba(155, 89, 182, 0.22);
-    color: #d3a2e6;
-    border-color: rgba(155, 89, 182, 0.7);
-    font-weight: bold;
-  }
-}
-
-.session-phase {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.session-phase-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 9px 14px;
-  background: none;
-  border: none;
-  color: $lightwhite;
-  font-family: $mainfont;
-  font-size: $normal;
-  text-align: left;
-  cursor: pointer;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
-}
-
-.session-phase-caret {
-  width: 10px;
-  color: $midwhite;
-}
-
-.session-phase-label {
-  flex: 1;
-}
-
-.session-phase-count {
-  font-size: $xsmall;
-  color: $midwhite;
-  background: rgba(255, 255, 255, 0.09);
-  border-radius: 8px;
-  padding: 1px 7px;
-}
-
-.session-phase-body {
-  padding: 2px 14px 12px calc(#{$session-time-width} + 4px);
-}
-
-.session-row {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 3px 0;
-  font-size: $small;
-  line-height: 1.5;
-
-  &.success .session-cred-mark {
-    color: #6ee7a0;
-  }
-
-  &.failure .session-cred-mark {
-    color: #e07a72;
-  }
-
-  &.payload .session-row-body {
-    display: block;
-  }
-}
-
-.session-row-time {
-  position: absolute;
-  left: calc(-1 * #{$session-time-width});
-  width: $session-time-width;
-  flex: none;
-  font-family: $session-mono;
-  font-size: $xsmall;
-  color: $midwhite;
-  padding-top: 1px;
-}
-
-.session-row-body {
-  flex: 1;
-  min-width: 0;
-}
-
-.session-cred-mark {
-  font-weight: bold;
-  margin-right: 6px;
-}
-
-.session-cred-sep {
-  color: $midwhite;
-  margin: 0 2px;
-}
-
-.session-more {
-  margin-top: 6px;
-  padding: 0;
-  background: none;
-  border: none;
-  color: $midwhite;
-  font-family: $mainfont;
-  font-size: $xsmall;
-  text-decoration: underline;
-  cursor: pointer;
-
-  &:hover {
+    letter-spacing: 0.05em;
     color: $offwhite;
   }
 }
 
-// Attacker commands can be very long (whole scripts, injected SSH keys):
-// wrap them rather than letting the card scroll sideways.
-.session-command {
-  flex: 1;
-  min-width: 0;
+.session-eventid-index {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.session-eventid-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 6px 1px 4px;
+  border: 1px solid $session-rule;
+  border-radius: 10px;
+
+  code {
+    background: none;
+    padding: 0;
+    font-size: $xsmall;
+    color: $lightwhite;
+  }
+
+  b {
+    font-family: $session-mono;
+    font-size: $xsmall;
+    font-weight: 700;
+    color: $midwhite;
+  }
+}
+
+/* ------------------------------------------------------------ field rows */
+
+.session-fields {
   margin: 0;
-  padding: 7px 9px;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
+
+  .session-field {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 2px 0;
+
+    dt,
+    dd {
+      margin: 0;
+    }
+  }
+}
+
+.session-field-key {
+  flex: 0 0 $session-key-width;
   font-family: $session-mono;
   font-size: $xsmall;
-  line-height: 1.5;
-  color: #f5b44d;
-  white-space: pre-wrap;
+  color: $midwhite;
+  text-align: right;
   overflow-wrap: anywhere;
-  max-height: 220px;
-  overflow-y: auto;
 }
 
-.session-payload-dir {
-  display: block;
-  font-weight: bold;
-  color: #d3a2e6;
+.session-field-value {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
-.session-payload-line {
-  margin-top: 3px;
-}
-
-.session-shasum {
+.session-value {
   display: inline-block;
   max-width: 100%;
-  overflow-wrap: anywhere;
+
+  &.null,
+  &.empty {
+    color: $darkwhite;
+    font-style: normal;
+  }
 }
 
-.session-raw-type {
+.session-value-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.session-fields-absent {
+  margin: 4px 0 0 #{$session-key-width + 8px};
+  font-family: $session-mono;
+  font-size: $xsmall;
+  color: $darkwhite;
+  overflow-wrap: anywhere;
+
+  &::before {
+    content: "\2205\00a0";
+  }
+}
+
+/* ------------------------------------------------------------- log parts */
+
+.session-log {
+  border-bottom: 1px solid $session-rule;
+}
+
+.session-log-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 7px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: none;
+  color: $offwhite;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.session-log-caret {
+  flex: 0 0 10px;
+  font-size: $xsmall;
   color: $midwhite;
+}
+
+.session-log-eventid {
+  flex: 1 1 auto;
+  background: none;
+  padding: 0;
+  font-size: $normal;
+  color: $offwhite;
+}
+
+.session-log-count {
+  flex: 0 0 auto;
+  font-family: $session-mono;
+  font-size: $xsmall;
+  color: $midwhite;
+  border: 1px solid $session-rule;
+  border-radius: 8px;
+  padding: 0 5px;
+}
+
+.session-log-body {
+  padding: 6px 14px 10px;
+}
+
+.session-log-entry {
+  position: relative;
+
+  & + .session-log-entry {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed $session-rule;
+  }
+}
+
+.session-log-entry-index {
+  font-family: $session-mono;
+  font-size: $xsmall;
+  color: $darkwhite;
+  margin-bottom: 2px;
+
+  &::before {
+    content: "#";
+  }
 }

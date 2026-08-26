@@ -2,7 +2,6 @@ import React from "react";
 import { Portal } from "react-portal";
 import colors from "../../../../common/global";
 import ColoredMarkers from "../../../atoms/ColoredMarkers";
-import hash from "object-hash";
 import {
   calcOpacity,
   calculateColorPercentages,
@@ -88,7 +87,7 @@ function MapEvents({
     }, false);
 
     return (
-      <svg key={hash(location)}>
+      <svg key={location.label}>
         <g
           className={`location-event ${narrative ? "no-hover" : ""}`}
           transform={`translate(${x}, ${y})`}

@@ -1,343 +1,205 @@
 import React, { useState } from "react";
-import {
-  OUTCOME_COLORS,
-  OUTCOME_LABELS,
-  SESSION_OUTCOME,
-} from "../../common/cowrie";
-
-/** Auth attempts shown before the list is truncated. */
-const AUTH_PREVIEW = 5;
-const AUTH_TRUNCATE_ABOVE = 8;
-
-const COPY = {
-  connection: "Connessione",
-  auth: "Autenticazione",
-  commands: "Comandi",
-  payloads: "Payload",
-  closure: "Chiusura",
-  other: "Altri eventi",
-  source: "Sorgente",
-  ports: "Porte",
-  client: "Client SSH",
-  duration: "Durata",
-  noCredentials: "credenziali non rilevate",
-  showAll: "mostra tutti i %n tentativi",
-  showLess: "mostra meno",
-  url: "URL",
-  download: "Download",
-  upload: "Upload",
-  loginAttempts: "%n login",
-  loginSuccess: "%n riuscito",
-  commandsBadge: "%n comandi",
-  payloadsBadge: "%n payload",
-  eventsBadge: "%n eventi",
-  malware: "MALWARE RILEVATO",
-  noLogin: "nessun login",
-};
-
-function fmtTime(datetime) {
-  if (!(datetime instanceof Date)) return "";
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${pad(datetime.getHours())}:${pad(datetime.getMinutes())}:${pad(
-    datetime.getSeconds()
-  )}`;
-}
-
-function fmtDuration(seconds) {
-  if (seconds === null || seconds === undefined || Number.isNaN(seconds)) {
-    return "—";
-  }
-  if (seconds < 60) return `${Number(seconds).toFixed(1)}s`;
-  return `${Math.floor(seconds / 60)}m ${Math.round(seconds % 60)}s`;
-}
-
-function tpl(str, n) {
-  return str.replace("%n", n);
-}
-
-function badgeVariantFor(outcome) {
-  if (outcome === SESSION_OUTCOME.MALWARE) return "danger";
-  if (outcome === SESSION_OUTCOME.INTERACTIVE) return "warning";
-  if (outcome === SESSION_OUTCOME.AUTHENTICATED) return "success";
-  return "neutral";
-}
-
-const Badge = ({ variant = "neutral", children }) => (
-  <span className={`session-badge session-badge--${variant}`}>{children}</span>
-);
-
-const Row = ({ datetime, children, className = "" }) => (
-  <div className={`session-row ${className}`}>
-    <span className="session-row-time">{fmtTime(datetime)}</span>
-    <span className="session-row-body">{children}</span>
-  </div>
-);
-
-const Phase = ({ id, label, count, isOpen, onToggle, children }) => (
-  <div className={`session-phase ${isOpen ? "open" : ""}`}>
-    <button
-      type="button"
-      className="session-phase-toggle"
-      onClick={() => onToggle(id)}
-      aria-expanded={isOpen}
-    >
-      <span className="session-phase-caret">{isOpen ? "▾" : "▸"}</span>
-      <span className="session-phase-label">{label}</span>
-      {count !== undefined && (
-        <span className="session-phase-count">{count}</span>
-      )}
-    </button>
-    {isOpen && <div className="session-phase-body">{children}</div>}
-  </div>
-);
+import { ENVELOPE_FIELDS, STAGE_COLORS } from "../../common/cowrie";
 
 /**
- * Credential attempts. Bots try dozens of pairs per session, so long lists are
- * collapsed to a preview until the analyst asks for the rest.
+ * One Cowrie attack session, rendered as raw log.
+ *
+ * There is deliberately no naturalised copy in here: every section is titled
+ * with its Cowrie `eventid`, every row is labelled with the Cowrie field name,
+ * and every value is printed exactly as it appears in the log. The only text
+ * this component owns are the field names themselves.
+ *
+ * Field order per section comes from `public/cowrie_event_schema.json`:
+ * `timestamp` first, then the fields that schema declares for the eventid,
+ * then `message` (Cowrie's own rendering of the others) last, then any field
+ * present in the log but absent from the schema. Schema fields that the log
+ * did not carry are listed, by name, at the foot of the entry.
  */
-const AuthPhase = ({ attempts }) => {
-  const [showAll, setShowAll] = useState(false);
-  const isTruncated = attempts.length > AUTH_TRUNCATE_ABOVE && !showAll;
-  const shown = isTruncated ? attempts.slice(0, AUTH_PREVIEW) : attempts;
+
+/** Printed once in the header instead of on every row. */
+const HEADER_FIELDS = new Set([...ENVELOPE_FIELDS, "datetime"]);
+
+const ABSENT_TITLE =
+  "campi dichiarati da cowrie_event_schema.json e non presenti in questo evento";
+
+function isPresent(event, key) {
+  return Object.prototype.hasOwnProperty.call(event, key);
+}
+
+/**
+ * The fields to print for one raw Cowrie event, in display order.
+ *
+ * @param {object} event a raw Cowrie event
+ * @param {Array<string>} schemaFields `cowrie_event_schema.json[eventid]`
+ * @returns {{ fields: Array<string>, absent: Array<string> }}
+ */
+export function orderFields(event, schemaFields = []) {
+  const declared = schemaFields.filter((key) => !HEADER_FIELDS.has(key));
+  const logged = Object.keys(event).filter((key) => !HEADER_FIELDS.has(key));
+
+  const specific = declared.filter(
+    (key) => key !== "timestamp" && key !== "message"
+  );
+  const undeclared = logged.filter(
+    (key) => !declared.includes(key) && key !== "timestamp" && key !== "message"
+  );
+
+  const ordered = [
+    ...(isPresent(event, "timestamp") ? ["timestamp"] : []),
+    ...specific,
+    ...undeclared,
+    ...(isPresent(event, "message") ? ["message"] : []),
+  ];
+
+  return {
+    fields: ordered.filter((key) => isPresent(event, key)),
+    absent: ordered.filter((key) => !isPresent(event, key)),
+  };
+}
+
+/** Print a Cowrie value verbatim; only its container shape is interpreted. */
+const Value = ({ value }) => {
+  if (value === null) return <code className="session-value null">null</code>;
+
+  if (Array.isArray(value)) {
+    if (value.length === 0)
+      return <code className="session-value empty">[]</code>;
+    return (
+      <span className="session-value-list">
+        {value.map((item, idx) => (
+          <code className="session-value" key={idx}>
+            {typeof item === "object" ? JSON.stringify(item) : String(item)}
+          </code>
+        ))}
+      </span>
+    );
+  }
+
+  if (typeof value === "object") {
+    return <code className="session-value">{JSON.stringify(value)}</code>;
+  }
+
+  return <code className="session-value">{String(value)}</code>;
+};
+
+const Field = ({ name, value }) => (
+  <div className="session-field">
+    <dt className="session-field-key">{name}</dt>
+    <dd className="session-field-value">
+      <Value value={value} />
+    </dd>
+  </div>
+);
+
+/** One occurrence of an eventid inside the session. */
+const LogEntry = ({ event, index, total, schemaFields }) => {
+  const { fields, absent } = orderFields(event, schemaFields);
 
   return (
-    <>
-      {shown.map((attempt, idx) => (
-        <Row
-          key={`auth-${idx}`}
-          datetime={attempt.datetime}
-          className={attempt.success ? "success" : "failure"}
-        >
-          <span className="session-cred-mark">
-            {attempt.success ? "✓" : "✗"}
-          </span>
-          {attempt.username === null && attempt.password === null ? (
-            <em>{COPY.noCredentials}</em>
-          ) : (
-            <code className="session-cred">
-              {attempt.username || "∅"}
-              <span className="session-cred-sep">:</span>
-              {attempt.password || "∅"}
-            </code>
-          )}
-        </Row>
-      ))}
-      {attempts.length > AUTH_TRUNCATE_ABOVE && (
-        <button
-          type="button"
-          className="session-more"
-          onClick={() => setShowAll(!showAll)}
-        >
-          {showAll ? COPY.showLess : tpl(COPY.showAll, attempts.length)}
-        </button>
+    <div className="session-log-entry">
+      {total > 1 && <div className="session-log-entry-index">{index + 1}</div>}
+      <dl className="session-fields">
+        {fields.map((name) => (
+          <Field key={name} name={name} value={event[name]} />
+        ))}
+      </dl>
+      {absent.length > 0 && (
+        <div className="session-fields-absent" title={ABSENT_TITLE}>
+          {absent.join(" · ")}
+        </div>
       )}
-    </>
+    </div>
   );
 };
 
-/**
- * The chronological story of one Cowrie attack session: summary badges always
- * visible, each phase of the attack expandable underneath.
- */
-const SessionCard = ({ session }) => {
-  const { phases, stats, outcome } = session;
+/** All occurrences of one eventid, under a heading naming that eventid. */
+const LogSection = ({ eventid, events, schemaFields }) => {
+  const [isOpen, setIsOpen] = useState(true);
 
-  // Open the phases that carry the finding: payloads and commands are what an
-  // analyst reaches for; a pure brute-force session opens on its credentials.
-  const [openPhases, setOpenPhases] = useState(() => {
-    const open = new Set(["connection"]);
-    if (stats.payloadCount > 0) open.add("payloads");
-    if (stats.commandCount > 0) open.add("commands");
-    if (
-      stats.payloadCount === 0 &&
-      stats.commandCount === 0 &&
-      stats.loginAttempts > 0
-    ) {
-      open.add("auth");
-    }
-    return open;
-  });
+  return (
+    <section className={`session-log ${isOpen ? "open" : ""}`}>
+      <button
+        type="button"
+        className="session-log-head"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+      >
+        <span className="session-log-caret">{isOpen ? "▾" : "▸"}</span>
+        <code className="session-log-eventid">{eventid}</code>
+        <span className="session-log-count">{events.length}</span>
+      </button>
+      {isOpen && (
+        <div className="session-log-body">
+          {events.map((event, idx) => (
+            <LogEntry
+              key={`${event.timestamp}-${idx}`}
+              event={event}
+              index={idx}
+              total={events.length}
+              schemaFields={schemaFields}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+};
 
-  const toggle = (id) =>
-    setOpenPhases((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+const SessionCard = ({ session, eventSchema = {} }) => {
+  if (!session) return null;
 
-  const isOpen = (id) => openPhases.has(id);
+  // Constant across every event of the session, so it is printed once here.
+  const envelope = [
+    ["src_ip", session.srcIp],
+    ["src_port", session.srcPort],
+    ["dst_ip", session.dstIp],
+    ["dst_port", session.dstPort],
+    ["protocol", session.protocol],
+    ["location", session.location],
+    ["latitude", session.latitude],
+    ["longitude", session.longitude],
+    ["timestamp", session.startTimestamp],
+    ["duration", session.durationSec],
+    ["sensor", session.sensor],
+    ["uuid", session.uuid],
+  ];
 
   return (
     <div
       className="session-card"
-      style={{ borderLeftColor: OUTCOME_COLORS[outcome] }}
+      style={{ borderLeftColor: STAGE_COLORS[session.stage] }}
     >
       <div className="session-card-header">
-        <div className="session-card-title">
+        <div className="session-card-id">
+          <span className="session-field-key">session</span>
           <code className="session-id">{session.id}</code>
-          <span className="session-ip">{session.srcIp || "—"}</span>
         </div>
-        <div className="session-card-subtitle">
-          {session.location || "—"}
-          <span className="session-dot">·</span>
-          {fmtTime(session.startDatetime)}
-          <span className="session-dot">·</span>
-          {fmtDuration(session.durationSec)}
-        </div>
-        <div className="session-badges">
-          <Badge>{tpl(COPY.eventsBadge, stats.eventCount)}</Badge>
-          {stats.loginAttempts > 0 ? (
-            <Badge variant={stats.loginSuccess > 0 ? "success" : "warning"}>
-              {tpl(COPY.loginAttempts, stats.loginAttempts)}
-              {stats.loginSuccess > 0
-                ? ` · ${tpl(COPY.loginSuccess, stats.loginSuccess)}`
-                : ""}
-            </Badge>
-          ) : (
-            <Badge>{COPY.noLogin}</Badge>
+        <dl className="session-fields session-envelope">
+          {envelope.map(([name, value]) =>
+            value === null || value === undefined || value === "" ? null : (
+              <Field key={name} name={name} value={value} />
+            )
           )}
-          {stats.commandCount > 0 && (
-            <Badge variant="warning">
-              {tpl(COPY.commandsBadge, stats.commandCount)}
-            </Badge>
-          )}
-          {stats.payloadCount > 0 && (
-            <Badge variant="danger">
-              {tpl(COPY.payloadsBadge, stats.payloadCount)}
-            </Badge>
-          )}
-          <Badge variant={badgeVariantFor(outcome)}>
-            {outcome === SESSION_OUTCOME.MALWARE
-              ? COPY.malware
-              : OUTCOME_LABELS[outcome]}
-          </Badge>
+        </dl>
+        <div className="session-eventid-index">
+          {session.groups.map((group) => (
+            <span className="session-eventid-chip" key={group.eventid}>
+              <code>{group.eventid}</code>
+              <b>{group.events.length}</b>
+            </span>
+          ))}
         </div>
       </div>
 
-      <div className="session-phases">
-        <Phase
-          id="connection"
-          label={`1. ${COPY.connection}`}
-          isOpen={isOpen("connection")}
-          onToggle={toggle}
-        >
-          <Row datetime={session.startDatetime}>
-            {COPY.source}: <code>{session.srcIp || "—"}</code>
-            {session.srcPort !== null && session.dstPort !== null && (
-              <>
-                {" · "}
-                {COPY.ports}:{" "}
-                <code>
-                  {session.srcPort} → {session.dstPort}
-                </code>
-              </>
-            )}
-          </Row>
-          {session.location && <Row datetime={null}>{session.location}</Row>}
-          {phases.fingerprint.map((fp, idx) => (
-            <Row key={`fp-${idx}`} datetime={fp.datetime}>
-              {COPY.client}: <code>{fp.clientVersion || "—"}</code>
-            </Row>
-          ))}
-        </Phase>
-
-        {phases.auth.length > 0 && (
-          <Phase
-            id="auth"
-            label={`2. ${COPY.auth}`}
-            count={phases.auth.length}
-            isOpen={isOpen("auth")}
-            onToggle={toggle}
-          >
-            <AuthPhase attempts={phases.auth} />
-          </Phase>
-        )}
-
-        {phases.commands.length > 0 && (
-          <Phase
-            id="commands"
-            label={`3. ${COPY.commands}`}
-            count={phases.commands.length}
-            isOpen={isOpen("commands")}
-            onToggle={toggle}
-          >
-            {phases.commands.map((cmd, idx) => (
-              <div className="session-row" key={`cmd-${idx}`}>
-                <span className="session-row-time">
-                  {fmtTime(cmd.datetime)}
-                </span>
-                <pre className="session-command">{cmd.command || "—"}</pre>
-              </div>
-            ))}
-          </Phase>
-        )}
-
-        {phases.payloads.length > 0 && (
-          <Phase
-            id="payloads"
-            label={`4. ${COPY.payloads}`}
-            count={phases.payloads.length}
-            isOpen={isOpen("payloads")}
-            onToggle={toggle}
-          >
-            {phases.payloads.map((payload, idx) => (
-              <Row
-                key={`payload-${idx}`}
-                datetime={payload.datetime}
-                className="payload"
-              >
-                <span className="session-payload-dir">
-                  {payload.direction === "download" ? "⬇" : "⬆"}{" "}
-                  {payload.direction === "download"
-                    ? COPY.download
-                    : COPY.upload}
-                </span>
-                {payload.url && (
-                  <div className="session-payload-line">
-                    {COPY.url}: <code>{payload.url}</code>
-                  </div>
-                )}
-                {payload.shasum && (
-                  <div className="session-payload-line">
-                    <code className="session-shasum" title={payload.savedPath}>
-                      {payload.shasum}
-                    </code>
-                  </div>
-                )}
-              </Row>
-            ))}
-          </Phase>
-        )}
-
-        {phases.closure && (
-          <Phase
-            id="closure"
-            label={`5. ${COPY.closure}`}
-            isOpen={isOpen("closure")}
-            onToggle={toggle}
-          >
-            <Row datetime={phases.closure.datetime}>
-              {COPY.duration}: {fmtDuration(session.durationSec)}
-            </Row>
-          </Phase>
-        )}
-
-        {phases.other.length > 0 && (
-          <Phase
-            id="other"
-            label={COPY.other}
-            count={phases.other.length}
-            isOpen={isOpen("other")}
-            onToggle={toggle}
-          >
-            {phases.other.map((item, idx) => (
-              <Row key={`other-${idx}`} datetime={item.datetime}>
-                <code className="session-raw-type">{item.event.type}</code>
-              </Row>
-            ))}
-          </Phase>
-        )}
+      <div className="session-logs">
+        {session.groups.map((group) => (
+          <LogSection
+            key={group.eventid}
+            eventid={group.eventid}
+            events={group.events}
+            schemaFields={eventSchema[group.eventid]}
+          />
+        ))}
       </div>
     </div>
   );

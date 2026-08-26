@@ -1,53 +1,53 @@
 [
   {
-    "id": "Connection",
-    "title": "Connection",
-    "desc": "Eventi di connessione (Open/Closed)",
+    "id": "stage:cowrie.session.connect",
+    "title": "cowrie.session.connect",
+    "desc": "Sessioni la cui traccia si ferma all'handshake: nessun cowrie.login.*, cowrie.command.* o trasferimento file registrato.",
     "mode": "CATEGORY",
     "filter_paths": [
       "default"
     ]
   },
   {
-    "id": "Fingerprint",
-    "title": "Fingerprint",
-    "desc": "Identificazione client SSH e KEX",
+    "id": "stage:cowrie.login.failed",
+    "title": "cowrie.login.failed",
+    "desc": "Sessioni con almeno un cowrie.login.failed e nessun cowrie.login.success.",
     "mode": "CATEGORY",
     "filter_paths": [
       "default"
     ]
   },
   {
-    "id": "Authentication",
-    "title": "Authentication",
-    "desc": "Tentativi di login (successo/fallimento)",
+    "id": "stage:cowrie.login.success",
+    "title": "cowrie.login.success",
+    "desc": "Sessioni con cowrie.login.success e nessun cowrie.command.*, cowrie.direct-tcpip.* o trasferimento file.",
     "mode": "CATEGORY",
     "filter_paths": [
       "default"
     ]
   },
   {
-    "id": "Command",
-    "title": "Command",
-    "desc": "Comandi eseguiti nella shell interattiva",
+    "id": "stage:cowrie.command.input",
+    "title": "cowrie.command.input",
+    "desc": "Sessioni con eventi cowrie.command.* (input/failed/success/chpasswd) e nessun trasferimento file o tunnel.",
     "mode": "CATEGORY",
     "filter_paths": [
       "default"
     ]
   },
   {
-    "id": "Malware",
-    "title": "Malware",
-    "desc": "Download e upload di file",
+    "id": "stage:cowrie.direct-tcpip.request",
+    "title": "cowrie.direct-tcpip.request",
+    "desc": "Sessioni con eventi cowrie.direct-tcpip.* e nessun trasferimento file.",
     "mode": "CATEGORY",
     "filter_paths": [
       "default"
     ]
   },
   {
-    "id": "General",
-    "title": "General",
-    "desc": "Altri eventi honeypot e chiusura sessioni log",
+    "id": "stage:cowrie.session.file_download",
+    "title": "cowrie.session.file_download",
+    "desc": "Sessioni con cowrie.session.file_download, cowrie.session.file_download.failed o cowrie.session.file_upload.",
     "mode": "CATEGORY",
     "filter_paths": [
       "default"

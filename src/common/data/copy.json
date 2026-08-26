@@ -114,6 +114,7 @@
       "summary_title": "Resumen",
       "header": "eventos seleccionados",
       "session_header": "attack session",
+      "session_header_plural": "attack sessions",
       "unknown_location": "Ubicación desconocida",
       "unknown_time": "Día y hora desconocida",
       "timestamp": "Día y hora",
@@ -222,6 +223,7 @@
     "cardstack": {
       "header": "selected events",
       "session_header": "attack session",
+      "session_header_plural": "attack sessions",
       "timestamp": "Day and time",
       "unknown_location": "Unknown location",
       "estimated": "estimated",

@@ -15,11 +15,16 @@ export class FullscreenToggle extends React.Component {
   }
 
   componentDidMount() {
-    screenfull.on("change", this.onFullscreenStateChange);
+    // screenfull ships a bare stub where the API is unavailable: no `on`/`off`
+    if (screenfull.isEnabled) {
+      screenfull.on("change", this.onFullscreenStateChange);
+    }
   }
 
   componentWillUnmount() {
-    screenfull.off("change", this.onFullscreenStateChange);
+    if (screenfull.isEnabled) {
+      screenfull.off("change", this.onFullscreenStateChange);
+    }
   }
 
   onFullscreenStateChange(evt) {

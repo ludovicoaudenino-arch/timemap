@@ -14,8 +14,6 @@ import {
 } from "./helpers";
 import { ASSOCIATION_MODES, SHAPE } from "../common/constants";
 
-export * from "./sessions";
-
 // Input selectors
 export const getEvents = (state) => state.domain.events;
 export const getCategories = (state) =>
@@ -37,6 +35,7 @@ export const getFilters = (state) =>
     (item) => item.mode === ASSOCIATION_MODES.FILTER
   );
 export const getNotifications = (state) => state.domain.notifications;
+export const getEventSchema = (state) => state.domain.eventSchema;
 export const getActiveFilters = (state) => state.app.associations.filters;
 export const getActiveCategories = (state) => state.app.associations.categories;
 export const getActiveShapes = (state) => state.app.shapes;
@@ -328,6 +327,22 @@ export const selectStackedEvents = createSelector(
   (eventsWithProjects) => {
     return eventsWithProjects[0];
   }
+);
+
+/**
+ * The events the timeline draws, without the Cowrie session payload.
+ *
+ * `Timeline` hashes its entire props object on every update (drag, zoom), and
+ * the raw log lines hanging off each session make that hash an order of
+ * magnitude more expensive (~680ms vs ~75ms for 1000 sessions). The timeline
+ * only needs the position, colour and associations of each event; the card
+ * stack reads the session off `app.selected`.
+ */
+export const selectTimelineEvents = createSelector(
+  [selectStackedEvents],
+  (events) =>
+    // NB: sparse array, indexed by event id; `map` preserves the holes
+    events.map(({ session, ...rest }) => rest)
 );
 
 export const selectProjects = createSelector(

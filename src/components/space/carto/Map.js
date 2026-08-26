@@ -69,7 +69,10 @@ class Map extends React.Component {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    if (!isIdentical(nextProps.domain.locations, this.props.domain.locations)) {
+    // `selectLocations` is memoised, so a new array reference is exactly the
+    // signal that the locations changed. Deep-hashing them instead costs
+    // ~380ms per update once each location carries its Cowrie sessions.
+    if (nextProps.domain.locations !== this.props.domain.locations) {
       this.loadClusterData(nextProps.domain.locations);
     }
 
@@ -78,7 +81,8 @@ class Map extends React.Component {
     if (!isIdentical(bounds, this.props.app.map.bounds) && bounds !== null) {
       this.map.fitBounds(bounds);
     } else {
-      if (!isIdentical(nextProps.app.selected, this.props.app.selected)) {
+      // `selectSelected` is memoised too, so reference equality is enough
+      if (nextProps.app.selected !== this.props.app.selected) {
         // Fly to first  of events selected
         const eventPoint =
           nextProps.app.selected.length > 0 ? nextProps.app.selected[0] : null;
@@ -287,6 +291,9 @@ class Map extends React.Component {
     const transform = window
       .getComputedStyle(mapNode)
       .getPropertyValue("transform");
+
+    // Before leaflet has panned the pane there is no matrix to read
+    if (!transform || !transform.startsWith("matrix")) return;
 
     // Offset with leaflet map transform boundaries
     this.setState({

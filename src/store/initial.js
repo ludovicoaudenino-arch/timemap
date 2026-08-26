@@ -30,6 +30,8 @@ const initial = {
   domain: {
     events: [],
     categories: [],
+    // Cowrie's field list per eventid, fetched from EVENT_SCHEMA_EXT
+    eventSchema: {},
     associations: [],
     sources: {},
     sites: [],
@@ -53,8 +55,6 @@ const initial = {
     },
     highlighted: null,
     selected: [],
-    // id of the Cowrie attack session shown in the card stack (SESSION_AGGREGATION)
-    selectedSessionId: null,
     source: null,
     associations: {
       coloringSet: [],

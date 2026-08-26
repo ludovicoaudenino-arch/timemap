@@ -2,7 +2,6 @@ import {
   TOGGLE_ASSOCIATIONS,
   UPDATE_COLORING_SET,
   UPDATE_SELECTED,
-  UPDATE_SELECTED_SESSION,
   UPDATE_TIMERANGE,
 } from "../../../actions";
 import { ASSOCIATION_MODES } from "../../../common/constants";
@@ -41,35 +40,22 @@ export function isSchemaArray(schema) {
  *    !for performance reasons, this function works with a mutable ref to `state`!
  */
 export const SCHEMA = Object.freeze({
-  id: {
-    key: "id",
-    trigger: UPDATE_SELECTED,
-    type: SCHEMA_TYPES.NUMBER_ARRAY,
-    dehydrate(state) {
-      return getSelected(state).map(({ id }) => id);
-    },
-    // TODO: determine time range if `range` not set.
-    rehydrate(nextState, { id }) {
-      if (id?.length) {
-        nextState.app.selected = id.map((id) =>
-          nextState.domain.events.find((e) => e.id === id)
-        );
-      }
-    },
-  },
   session: {
     key: "session",
-    trigger: UPDATE_SELECTED_SESSION,
-    type: SCHEMA_TYPES.STRING,
+    trigger: UPDATE_SELECTED,
+    type: SCHEMA_TYPES.STRING_ARRAY,
+    // Cowrie session ids rather than array indices: they survive a change of
+    // dataset, and one selected event is one attack session.
     dehydrate(state) {
-      return state.app.selectedSessionId;
+      return getSelected(state).map(({ civId }) => civId);
     },
+    // TODO: determine time range if `range` not set.
     rehydrate(nextState, { session }) {
-      if (!session) return;
-      nextState.app.selectedSessionId = session;
-      // keep `app.selected` in sync so the map and timeline markers highlight
-      const events = nextState.domain.events.filter((e) => e.civId === session);
-      if (events.length) nextState.app.selected = events;
+      if (session?.length) {
+        nextState.app.selected = session
+          .map((id) => nextState.domain.events.find((e) => e.civId === id))
+          .filter(Boolean);
+      }
     },
   },
   range: {
