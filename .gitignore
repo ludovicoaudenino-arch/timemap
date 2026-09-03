@@ -1,11 +1,11 @@
 .idea/
 build/
+dist/
 node_modules/
 
 *config.js
+!vite.config.js
 dev.config.js
-!config/webpack*.config.js
-!config/getHttpsConfig.js
 
 
 tags
