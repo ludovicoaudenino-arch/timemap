@@ -1,8 +1,10 @@
-import Joi from "joi";
+import { z } from "zod";
 
-const regionSchema = Joi.object().keys({
-  name: Joi.string().required(),
-  items: Joi.array().required(),
-});
+const regionSchema = z
+  .object({
+    name: z.string(),
+    items: z.array(z.any()),
+  })
+  .strict();
 
 export default regionSchema;

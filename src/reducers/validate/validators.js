@@ -1,5 +1,3 @@
-import Joi from "joi";
-
 import createEventSchema from "./eventSchema";
 import siteSchema from "./siteSchema";
 import associationsSchema from "./associationsSchema";
@@ -74,12 +72,24 @@ export function validateDomain(domain, features) {
     shapes: [],
   };
 
+  function formatZodError(error) {
+    if (!error || !error.issues) return error?.message || "Validation error";
+    return error.issues
+      .map((i) =>
+        i.path && i.path.length > 0
+          ? `${i.path.join(".")}: ${i.message}`
+          : i.message
+      )
+      .join(", ");
+  }
+
   function validateArrayItem(item, domainKey, schema) {
-    const result = Joi.validate(item, schema);
-    if (result.error !== null) {
+    const result = schema.safeParse(item);
+    if (!result.success) {
       const id = item.id || "-";
       const domainStr = capitalize(domainKey);
-      const error = makeError(domainStr, id, result.error.message);
+      const message = formatZodError(result.error);
+      const error = makeError(domainStr, id, message);
 
       discardedDomain[domainKey].push(Object.assign(item, { error }));
     } else {
@@ -99,13 +109,14 @@ export function validateDomain(domain, features) {
     Object.keys(obj).forEach((key) => {
       if (key === "") return;
       const vl = obj[key];
-      const result = Joi.validate(vl, itemSchema);
-      if (result.error !== null) {
+      const result = itemSchema.safeParse(vl);
+      if (!result.success) {
         const id = vl.id || "-";
         const domainStr = capitalize(domainKey);
+        const message = formatZodError(result.error);
         discardedDomain[domainKey].push({
           ...vl,
-          error: makeError(domainStr, id, result.error.message),
+          error: makeError(domainStr, id, message),
         });
       } else {
         sanitizedDomain[domainKey][key] = vl;

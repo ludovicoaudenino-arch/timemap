@@ -1,9 +1,9 @@
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import dayjs from "dayjs";
-import hash from "object-hash";
 import { timeFormatDefaultLocale } from "d3";
 
 import { ASSOCIATION_MODES, POLYGON_CLIP_PATH } from "./constants";
+import esMX from "./data/es-MX.json";
 
 dayjs.extend(customParseFormat);
 
@@ -334,7 +334,19 @@ export function selectTypeFromPathWithPoster(path, poster) {
 }
 
 export function isIdentical(obj1, obj2) {
-  return hash(obj1) === hash(obj2);
+  if (obj1 === obj2) return true;
+  if (!obj1 || !obj2) return false;
+  if (Array.isArray(obj1) && Array.isArray(obj2)) {
+    if (obj1.length !== obj2.length) return false;
+    return obj1.every((val, idx) => isIdentical(val, obj2[idx]));
+  }
+  if (typeof obj1 === "object" && typeof obj2 === "object") {
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+    if (keys1.length !== keys2.length) return false;
+    return keys1.every((key) => isIdentical(obj1[key], obj2[key]));
+  }
+  return false;
 }
 
 export function calcOpacity(num) {
@@ -494,7 +506,7 @@ export function makeNiceDate(datetime) {
  */
 export function setD3Locale() {
   const languages = {
-    "es-MX": require("./data/es-MX.json"),
+    "es-MX": esMX,
   };
 
   if (language !== "es-US" && languages[language]) {

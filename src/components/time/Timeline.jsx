@@ -2,7 +2,6 @@ import React from "react";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { scaleTime, timeMinute, timeSecond } from "d3";
-import hash from "object-hash";
 
 import { setLoading, setNotLoading, updateTicks } from "../../actions";
 import * as selectors from "../../selectors";
@@ -45,7 +44,7 @@ class Timeline extends React.Component {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    if (hash(nextProps) !== hash(this.props)) {
+    if (nextProps.app.timeline.range !== this.props.app.timeline.range) {
       this.setState({
         timerange: nextProps.app.timeline.range,
         scaleX: this.makeScaleX(),
@@ -53,8 +52,8 @@ class Timeline extends React.Component {
     }
 
     if (
-      hash(nextProps.activeCategories) !== hash(this.props.activeCategories) ||
-      hash(nextProps.dimensions) !== hash(this.props.dimensions)
+      nextProps.activeCategories !== this.props.activeCategories ||
+      nextProps.dimensions !== this.props.dimensions
     ) {
       const { trackHeight, marginTop } = nextProps.dimensions;
       this.setState({

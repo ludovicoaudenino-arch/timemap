@@ -1,7 +1,6 @@
 import React from "react";
 import { Portal } from "react-portal";
 import colors from "../../../../common/global";
-import hash from "object-hash";
 
 class MapSelectedEvents extends React.Component {
   renderMarker(marker) {
@@ -13,7 +12,7 @@ class MapSelectedEvents extends React.Component {
     const r = marker.radius ? marker.radius + 5 : 24;
     return (
       <g
-        key={hash(marker)}
+        key={marker.id}
         className="location-marker"
         transform={`translate(${x - r}, ${y})`}
       >

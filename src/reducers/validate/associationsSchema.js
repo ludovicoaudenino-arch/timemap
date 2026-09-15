@@ -1,11 +1,13 @@
-import Joi from "joi";
+import { z } from "zod";
 
-const associationsSchema = Joi.object().keys({
-  id: Joi.string().allow("").required(),
-  title: Joi.string().allow("").required(),
-  desc: Joi.string().allow(""),
-  mode: Joi.string().allow("").required(),
-  filter_paths: Joi.array(),
-});
+const associationsSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    desc: z.string().optional(),
+    mode: z.string(),
+    filter_paths: z.array(z.any()).optional(),
+  })
+  .passthrough();
 
 export default associationsSchema;

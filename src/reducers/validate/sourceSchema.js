@@ -1,18 +1,20 @@
-import Joi from "joi";
+import { z } from "zod";
 
-const sourceSchema = Joi.object().keys({
-  id: Joi.string().required(),
-  title: Joi.string().allow(""),
-  thumbnail: Joi.string().allow(""),
-  paths: Joi.array().required(),
-  type: Joi.string().allow(""),
-  affil_s: Joi.array().allow(""),
-  url: Joi.string().allow(""),
-  description: Joi.string().allow(""),
-  parent: Joi.string().allow(""),
-  author: Joi.string().allow(""),
-  date: Joi.string().allow(""),
-  notes: Joi.string().allow(""),
-});
+const sourceSchema = z
+  .object({
+    id: z.string(),
+    title: z.string().optional(),
+    thumbnail: z.string().optional(),
+    paths: z.array(z.any()),
+    type: z.string().optional(),
+    affil_s: z.array(z.any()).optional(),
+    url: z.string().optional(),
+    description: z.string().optional(),
+    parent: z.string().optional(),
+    author: z.string().optional(),
+    date: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .strict();
 
 export default sourceSchema;

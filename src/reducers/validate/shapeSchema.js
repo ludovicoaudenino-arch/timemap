@@ -1,10 +1,12 @@
-import Joi from "joi";
+import { z } from "zod";
 
-const shapeSchema = Joi.object().keys({
-  id: Joi.string().allow(""),
-  title: Joi.string().allow(""),
-  shape: Joi.string().allow(""),
-  colour: Joi.string().allow(""),
-});
+const shapeSchema = z
+  .object({
+    id: z.string().optional(),
+    title: z.string().optional(),
+    shape: z.string().optional(),
+    colour: z.string().optional(),
+  })
+  .strict();
 
 export default shapeSchema;

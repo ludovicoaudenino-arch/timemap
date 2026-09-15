@@ -6,7 +6,6 @@ import SessionCard from "./SessionCard";
 import * as selectors from "../../selectors";
 import { getFilterIdxFromColorSet } from "../../common/utilities";
 import copy from "../../common/data/copy.json";
-import hash from "object-hash";
 
 class CardStack extends React.Component {
   constructor() {
@@ -78,7 +77,7 @@ class CardStack extends React.Component {
 
       return (
         <Card
-          key={hash(content)}
+          key={event.id ?? idx}
           content={content}
           language={this.props.language}
           isLoading={this.props.isLoading}

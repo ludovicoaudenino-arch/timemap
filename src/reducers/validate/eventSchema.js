@@ -1,52 +1,68 @@
-import Joi from "joi";
+import { z } from "zod";
 
-function joiFromCustom(custom) {
+function zodFromCustom(custom) {
   const output = {};
-  custom.forEach((field) => {
-    if (field.kind === "text" || field.kind === "link") {
-      output[field.key] = Joi.string().allow("");
-    }
-    if (field.kind === "list") {
-      output[field.key] = Joi.array().allow("");
-    }
-  });
+  if (Array.isArray(custom)) {
+    custom.forEach((field) => {
+      if (field.kind === "text" || field.kind === "link") {
+        output[field.key] = z.string().optional();
+      }
+      if (field.kind === "list") {
+        output[field.key] = z.array(z.any()).optional();
+      }
+    });
+  }
   return output;
 }
 
 function createEventSchema(custom) {
-  return Joi.object()
-    .keys({
-      id: Joi.string().allow(""),
-      description: Joi.string().allow("").required(),
-      date: Joi.string().allow(""),
-      time: Joi.string().allow(""),
-      time_precision: Joi.string().allow(""),
+  return z
+    .object({
+      id: z.any().optional(),
+      description: z.string(),
+      date: z.string().optional(),
+      time: z.string().optional(),
+      time_precision: z.string().optional(),
 
       /* map */
-      location: Joi.string().allow(""),
-      latitude: Joi.string().allow(""),
-      longitude: Joi.string().allow(""),
+      location: z.string().optional(),
+      latitude: z.string().optional(),
+      longitude: z.string().optional(),
       /* space */
-      x: Joi.string().allow(""),
-      y: Joi.string().allow(""),
-      z: Joi.string().allow(""),
+      x: z.string().optional(),
+      y: z.string().optional(),
+      z: z.string().optional(),
 
-      type: Joi.string().allow(""),
-      category: Joi.string().allow(""),
-      category_full: Joi.string().allow(""),
-      associations: Joi.array().default([]),
-      sources: Joi.array(),
-      comments: Joi.string().allow(""),
-      time_display: Joi.string().allow(""),
+      type: z.string().optional(),
+      category: z.string().optional(),
+      category_full: z.string().optional(),
+      associations: z.array(z.any()).optional().default([]),
+      sources: z.array(z.any()).optional(),
+      comments: z.string().optional(),
+      time_display: z.string().optional(),
       // nested
-      narrative___stepStyles: Joi.array(),
-      shape: Joi.string().allow(""),
-      colour: Joi.string().allow(""),
-      ...joiFromCustom(custom),
+      narrative___stepStyles: z.array(z.any()).optional(),
+      shape: z.any().optional(),
+      colour: z.string().optional(),
+      ...zodFromCustom(custom),
     })
-    .unknown()
-    .and("latitude", "longitude")
-    .or("date", "latitude");
+    .passthrough()
+    .refine(
+      (data) => {
+        const hasLat = data.latitude !== undefined && data.latitude !== "";
+        const hasLon = data.longitude !== undefined && data.longitude !== "";
+        return (hasLat && hasLon) || (!hasLat && !hasLon);
+      },
+      { message: "latitude and longitude must be provided together" }
+    )
+    .refine(
+      (data) => {
+        const hasDate = data.date !== undefined && data.date !== "";
+        const hasLat = data.latitude !== undefined && data.latitude !== "";
+        return hasDate || hasLat;
+      },
+      { message: "at least one of date or latitude is required" }
+    );
 }
 
 export default createEventSchema;

@@ -1,12 +1,14 @@
-import Joi from "joi";
+import { z } from "zod";
 
-const siteSchema = Joi.object().keys({
-  id: Joi.string().required(),
-  description: Joi.string().allow("").required(),
-  site: Joi.string().required(),
-  latitude: Joi.string().required(),
-  longitude: Joi.string().required(),
-  enabled: Joi.string().allow(""),
-});
+const siteSchema = z
+  .object({
+    id: z.string(),
+    description: z.string(),
+    site: z.string(),
+    latitude: z.string(),
+    longitude: z.string(),
+    enabled: z.string().optional(),
+  })
+  .strict();
 
 export default siteSchema;

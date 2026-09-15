@@ -1,8 +1,9 @@
 .idea/
 build/
 dist/
-node_modules/
+docs/
 
+node_modules/
 *config.js
 !vite.config.js
 dev.config.js
@@ -25,5 +26,4 @@ tags
 .env.local
 /docs/cowrie-sessioni.md
 # Large datasets
-public/cowrie_by_session.json
 public/*.large.json
