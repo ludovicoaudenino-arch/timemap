@@ -27,3 +27,7 @@ tags
 /docs/cowrie-sessioni.md
 # Large datasets
 public/*.large.json
+
+__pycache__/
+*.pyc
+backend/data
