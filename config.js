@@ -26,7 +26,8 @@ module.exports = {
         rangeLimits: ['2026-04-01T00:00:00.000Z', '2026-08-01T00:00:00.000Z'],
         dimensions: {
           // Track labels are full Cowrie eventids, so the y axis needs room.
-          marginLeft: 80
+          marginLeft: 80,
+          width_controls: 20
         }
       }
     },

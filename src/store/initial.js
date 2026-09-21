@@ -84,7 +84,7 @@ const initial = {
         marginTop: isSmallLaptop ? 5 : 10, // the padding used for the day/month labels inside the timeline
         marginBottom: 60,
         contentHeight: isSmallLaptop ? 160 : 200,
-        width_controls: 100,
+        width_controls: 20,
       },
       range: [new Date("2026-04-02T12:00:00"), new Date("2026-04-03T00:00:00")],
       rangeLimits: [new Date("2000-01-01"), new Date("2030-01-01")],
