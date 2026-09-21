@@ -110,13 +110,14 @@ def get_session_events(session_id: str):
     con.execute("SET TimeZone = 'UTC'")
     query = f"""
         SELECT
+            seq,
             strftime(timestamp, '%Y-%m-%dT%H:%M:%S.000Z') AS timestamp,
             eventid,
             message,
             data_json
         FROM '{EVENTS_FILE}'
         WHERE session_id = ?
-        ORDER BY timestamp ASC
+        ORDER BY seq ASC
     """
     rel = con.execute(query, [session_id])
     records = [dict(zip([col[0] for col in rel.description], row)) for row in rel.fetchall()]
