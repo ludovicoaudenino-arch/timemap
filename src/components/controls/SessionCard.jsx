@@ -1,5 +1,9 @@
-import React, { useState } from "react";
-import { ENVELOPE_FIELDS, STAGE_COLORS } from "../../common/cowrie";
+import React, { useState, useEffect } from "react";
+import {
+  ENVELOPE_FIELDS,
+  STAGE_COLORS,
+  EVENTID_ORDER,
+} from "../../common/cowrie";
 
 /**
  * One Cowrie attack session, rendered as raw log.
@@ -148,6 +152,64 @@ const LogSection = ({ eventid, events, schemaFields }) => {
 const SessionCard = ({ session, eventSchema = {} }) => {
   if (!session) return null;
 
+  const [loadedGroups, setLoadedGroups] = useState(
+    session.groups && session.groups.length > 0 ? session.groups : []
+  );
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (session.groups && session.groups.length > 0) {
+      setLoadedGroups(session.groups);
+      return;
+    }
+
+    if (session.id) {
+      setLoading(true);
+      fetch(`/api/sessions/${session.id}/events`)
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then((rows) => {
+          const events = rows
+            .map((r) => {
+              try {
+                return JSON.parse(r.data_json);
+              } catch (e) {
+                return {
+                  eventid: r.eventid,
+                  timestamp: r.timestamp,
+                  message: r.message,
+                };
+              }
+            })
+            .filter((e) => e && e.eventid);
+
+          const byEventId = new Map();
+          events.forEach((ev) => {
+            if (!byEventId.has(ev.eventid)) byEventId.set(ev.eventid, []);
+            byEventId.get(ev.eventid).push(ev);
+          });
+
+          const groups = [...byEventId.entries()]
+            .map(([eventid, groupEvents]) => ({ eventid, events: groupEvents }))
+            .sort((a, b) => {
+              const order = EVENTID_ORDER || [];
+              const idxA = order.indexOf(a.eventid);
+              const idxB = order.indexOf(b.eventid);
+              return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
+            });
+
+          setLoadedGroups(groups);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.warn("Could not fetch session raw events:", err);
+          setLoading(false);
+        });
+    }
+  }, [session.id]);
+
   // Constant across every event of the session, so it is printed once here.
   const envelope = [
     ["src_ip", session.srcIp],
@@ -164,11 +226,13 @@ const SessionCard = ({ session, eventSchema = {} }) => {
     ["uuid", session.uuid],
   ];
 
+  const borderColor =
+    STAGE_COLORS && session.stage && STAGE_COLORS[session.stage]
+      ? STAGE_COLORS[session.stage]
+      : "#3fb950";
+
   return (
-    <div
-      className="session-card"
-      style={{ borderLeftColor: STAGE_COLORS[session.stage] }}
-    >
+    <div className="session-card" style={{ borderLeftColor: borderColor }}>
       <div className="session-card-header">
         <div className="session-card-id">
           <span className="session-field-key">session</span>
@@ -182,7 +246,7 @@ const SessionCard = ({ session, eventSchema = {} }) => {
           )}
         </dl>
         <div className="session-eventid-index">
-          {session.groups.map((group) => (
+          {loadedGroups.map((group) => (
             <span className="session-eventid-chip" key={group.eventid}>
               <code>{group.eventid}</code>
               <b>{group.events.length}</b>
@@ -192,7 +256,12 @@ const SessionCard = ({ session, eventSchema = {} }) => {
       </div>
 
       <div className="session-logs">
-        {session.groups.map((group) => (
+        {loading && (
+          <div style={{ padding: "12px", color: "#888", fontStyle: "italic" }}>
+            Caricamento eventi dettagliati...
+          </div>
+        )}
+        {loadedGroups.map((group) => (
           <LogSection
             key={group.eventid}
             eventid={group.eventid}

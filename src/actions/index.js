@@ -40,14 +40,27 @@ export function fetchDomain() {
     // A payload keyed by Cowrie `session` id is expanded into one domain event
     // per attack session; a plain array is passed through untouched.
     const eventPromise = Promise.all(
-      EVENT_DATA_URL.map((url) =>
-        fetch(url)
+      EVENT_DATA_URL.map((url) => {
+        let fetchUrl = url;
+        if (url && url.startsWith("/api/events") && !url.includes("?")) {
+          const state = getState();
+          const range =
+            state.app && state.app.timeline && state.app.timeline.range;
+          if (range && range.length === 2) {
+            const fromStr = new Date(range[0]).toISOString();
+            const toStr = new Date(range[1]).toISOString();
+            fetchUrl = `${url}?from_date=${encodeURIComponent(
+              fromStr
+            )}&to_date=${encodeURIComponent(toStr)}&limit=5000`;
+          }
+        }
+        return fetch(fetchUrl)
           .then((response) => response.json())
           .then((payload) =>
             isSessionKeyedExport(payload) ? sessionsToEvents(payload) : payload
           )
-          .catch(() => handleError("events"))
-      )
+          .catch(() => handleError("events"));
+      })
     ).then((results) => results.flatMap((t) => t));
 
     // Cowrie's field list per eventid: the session card renders each event's

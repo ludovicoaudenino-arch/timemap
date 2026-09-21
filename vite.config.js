@@ -31,6 +31,12 @@ export default defineConfig({
   server: {
     port: 8080,
     open: false,
+    proxy: {
+      "/api": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+      },
+    },
   },
   define: envDefines,
   test: {

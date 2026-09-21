@@ -112,7 +112,7 @@ def process_single_session(session_id: str, record: dict):
     }
 
     events_rows = []
-    for dt, ts_str, ev in parsed_events:
+    for seq_idx, (dt, ts_str, ev) in enumerate(parsed_events, start=1):
         msg = ev.get("message")
         if isinstance(msg, (list, dict)):
             msg_str = json.dumps(msg)
@@ -123,6 +123,7 @@ def process_single_session(session_id: str, record: dict):
 
         events_rows.append({
             "session_id": str(session_id),
+            "seq": seq_idx,
             "timestamp": dt,
             "eventid": ev.get("eventid"),
             "message": msg_str,
@@ -164,6 +165,7 @@ def run_pipeline(input_json_path: str, output_dir: str, batch_size: int = 50000)
 
     total_sessions_count = 0
     total_events_count = 0
+    failed_lines_count = 0
 
     print("\nElaborazione e scrittura Parquet in corso...")
 
@@ -192,7 +194,8 @@ def run_pipeline(input_json_path: str, output_dir: str, batch_size: int = 50000)
                         events_batch.extend(e_rows)
                         total_sessions_count += 1
                         total_events_count += len(e_rows)
-            except Exception:
+            except Exception as e:
+                failed_lines_count += 1
                 continue
 
             # Scrittura del blocco su disco quando si raggiunge il batch_size
@@ -235,10 +238,6 @@ def run_pipeline(input_json_path: str, output_dir: str, batch_size: int = 50000)
         writer_events.close()
 
     t_total = time.perf_counter() - t_start_total
-
-    # Sincronizza anche session.parquet (singolare)
-    single_parquet_path = os.path.join(output_dir, "session.parquet")
-    shutil.copyfile(sessions_parquet_path, single_parquet_path)
 
     size_sessions_bytes = os.path.getsize(sessions_parquet_path)
     size_events_bytes = os.path.getsize(events_parquet_path)

@@ -1,10 +1,12 @@
 .idea/
 build/
 dist/
-docs/
+docs/*
+!docs/*.md
 
 node_modules/
 *config.js
+!config.js
 !vite.config.js
 dev.config.js
 

@@ -65,44 +65,10 @@ function openTab(name) {
 }
 
 describe("the toolbar", () => {
-  it("offers both a category and a filter tab", () => {
+  it("offers the filter tab and omits categories when USE_CATEGORIES is false", () => {
     renderToolbar();
-    expect(screen.getByText(CATEGORY_TAB)).toBeInTheDocument();
+    expect(screen.queryByText(CATEGORY_TAB)).toBeNull();
     expect(screen.getByText(FILTER_TAB)).toBeInTheDocument();
-  });
-
-  it("lists the timeline tracks by their Cowrie eventid", () => {
-    const { container } = renderToolbar();
-    openTab(CATEGORY_TAB);
-    const panel = container.querySelector(".react-innertabpanel");
-
-    [
-      "cowrie.session.connect",
-      "cowrie.login.failed",
-      "cowrie.login.success",
-      "cowrie.command.input",
-      "cowrie.direct-tcpip.request",
-      "cowrie.session.file_download",
-    ].forEach((eventid) =>
-      expect(within(panel).getByText(eventid)).toBeInTheDocument()
-    );
-  });
-
-  it("starts with every category active and turns one off on click", () => {
-    renderToolbar();
-    openTab(CATEGORY_TAB);
-
-    expect(getActiveCategories(store.getState())).toContain(
-      "cowrie.login.success"
-    );
-    fireEvent.click(
-      screen
-        .getByText("cowrie.login.success")
-        .parentElement.querySelector("button")
-    );
-    expect(getActiveCategories(store.getState())).not.toContain(
-      "cowrie.login.success"
-    );
   });
 
   it("lays the filters out as the Cowrie eventid namespace tree", () => {
