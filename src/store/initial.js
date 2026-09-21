@@ -184,7 +184,7 @@ const initial = {
       },
     },
     coloring: {
-      maxNumOfColors: 4,
+      maxNumOfColors: 6,
       colors: Object.values(colors),
     },
     dom: {
