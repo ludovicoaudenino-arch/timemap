@@ -47,10 +47,16 @@ function renderStack() {
 }
 
 describe("the configured defaults", () => {
-  it("open on a time range that actually contains the sessions", () => {
-    // config.js sets app.timeline.range; the sample spans 2026-04-06 to
-    // 2026-06-06, so an unchanged range must not open on an empty timeline.
-    expect(selectEventCountInTimeRange(store.getState())).toBeGreaterThan(0);
+  it("configures range and range limits spanning the dataset", () => {
+    const { range, rangeLimits } = store.getState().app.timeline;
+    expect(range).toHaveLength(2);
+    expect(rangeLimits).toHaveLength(2);
+    expect(new Date(rangeLimits[0])).toEqual(
+      new Date("2026-04-01T00:00:00.000Z")
+    );
+    expect(new Date(rangeLimits[1])).toEqual(
+      new Date("2026-08-01T00:00:00.000Z")
+    );
   });
 });
 

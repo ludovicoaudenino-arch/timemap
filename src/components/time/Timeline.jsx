@@ -33,7 +33,9 @@ class Timeline extends React.Component {
       dims: props.dimensions,
       scaleX: null,
       scaleY: null,
-      timerange: [null, null], // two datetimes
+      timerange: (props.app &&
+        props.app.timeline &&
+        props.app.timeline.range) || [null, null], // two datetimes
       dragPos0: null,
       transitionDuration: 300,
     };

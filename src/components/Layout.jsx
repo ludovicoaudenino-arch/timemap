@@ -53,6 +53,45 @@ class Dashboard extends React.Component {
     window.dispatchEvent(new Event("resize"));
   }
 
+  componentDidUpdate(prevProps) {
+    const prevRange =
+      prevProps.app && prevProps.app.timeline && prevProps.app.timeline.range;
+    const currRange =
+      this.props.app &&
+      this.props.app.timeline &&
+      this.props.app.timeline.range;
+
+    const prevStart =
+      prevRange && prevRange[0] ? new Date(prevRange[0]).getTime() : null;
+    const prevEnd =
+      prevRange && prevRange[1] ? new Date(prevRange[1]).getTime() : null;
+    const currStart =
+      currRange && currRange[0] ? new Date(currRange[0]).getTime() : null;
+    const currEnd =
+      currRange && currRange[1] ? new Date(currRange[1]).getTime() : null;
+
+    if (
+      currStart !== null &&
+      currEnd !== null &&
+      prevStart !== null &&
+      prevEnd !== null &&
+      (prevStart !== currStart || prevEnd !== currEnd)
+    ) {
+      if (this.fetchEventsTimer) {
+        clearTimeout(this.fetchEventsTimer);
+      }
+      this.fetchEventsTimer = setTimeout(() => {
+        this.props.actions.fetchEvents(currRange);
+      }, 400);
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.fetchEventsTimer) {
+      clearTimeout(this.fetchEventsTimer);
+    }
+  }
+
   handleHighlight(highlighted) {
     this.props.actions.updateHighlighted(highlighted || null);
   }

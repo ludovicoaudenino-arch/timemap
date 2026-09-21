@@ -20,8 +20,10 @@ module.exports = {
         startZoom: 2
       },
       timeline: {
-        // The dataset spans 2026-04-02 → 2026-07-29; open on the whole of it.
-        range: ['2026-04-01T00:00:00', '2026-08-01T00:00:00'],
+        // Regime iniziale di 1 giorno (24h) attorno ai primi log noti (2-3 aprile 2026 UTC)
+        range: ['2026-04-02T12:00:00.000Z', '2026-04-03T12:00:00.000Z'],
+        // Limiti massimi di navigazione (intero dataset: aprile - agosto 2026)
+        rangeLimits: ['2026-04-01T00:00:00.000Z', '2026-08-01T00:00:00.000Z'],
         dimensions: {
           // Track labels are full Cowrie eventids, so the y axis needs room.
           marginLeft: 80

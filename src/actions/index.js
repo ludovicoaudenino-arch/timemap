@@ -180,6 +180,62 @@ export function updateDomain(payload) {
   };
 }
 
+export function fetchEvents(timerange) {
+  return (dispatch, getState) => {
+    const state = getState();
+    const range =
+      timerange ||
+      (state.app && state.app.timeline && state.app.timeline.range);
+    if (!range || range.length !== 2) {
+      return Promise.resolve([]);
+    }
+
+    const fromStr = new Date(range[0]).toISOString();
+    const toStr = new Date(range[1]).toISOString();
+
+    const urls = Array.isArray(EVENT_DATA_URL)
+      ? EVENT_DATA_URL
+      : [EVENT_DATA_URL];
+
+    return Promise.all(
+      urls.map((baseUrl) => {
+        const url = `${baseUrl}?from_date=${encodeURIComponent(
+          fromStr
+        )}&to_date=${encodeURIComponent(toStr)}&limit=5000`;
+
+        return fetch(url)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((payload) =>
+            isSessionKeyedExport(payload) ? sessionsToEvents(payload) : payload
+          )
+          .catch((err) => {
+            console.error("Failed to fetch events for timerange:", err);
+            return [];
+          });
+      })
+    ).then((results) => {
+      const events = results.flatMap((t) => t);
+      const currentDomain = getState().domain;
+      const features = getState().features;
+      dispatch(
+        updateDomain({
+          domain: {
+            ...currentDomain,
+            events,
+          },
+          features,
+        })
+      );
+      return events;
+    });
+  };
+}
+
 export function fetchSource(source) {
   return (dispatch) => {
     if (!SOURCES_URL) {

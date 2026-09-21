@@ -216,6 +216,14 @@ if (process.env.store) {
 // NB: config.js dates get implicitly converted to strings in mergeDeepLeft
 appStore.app.timeline.range[0] = new Date(appStore.app.timeline.range[0]);
 appStore.app.timeline.range[1] = new Date(appStore.app.timeline.range[1]);
+if (appStore.app.timeline.rangeLimits) {
+  appStore.app.timeline.rangeLimits[0] = new Date(
+    appStore.app.timeline.rangeLimits[0]
+  );
+  appStore.app.timeline.rangeLimits[1] = new Date(
+    appStore.app.timeline.rangeLimits[1]
+  );
+}
 appStore.app.flags.isIntropopup = !!appStore.app.intro;
 
 if ("map" in appStore.app) {
