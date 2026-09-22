@@ -275,10 +275,18 @@
         }
       }
 
+      .zoom-level-title {
+        font-size: $xsmall;
+        text-anchor: start;
+        letter-spacing: 0.08em;
+        fill: $midwhite;
+        opacity: 0.6;
+      }
+
       .zoom-level-button {
         font-size: $xsmall;
         cursor: pointer;
-        text-anchor: middle;
+        text-anchor: start;
         letter-spacing: 0.05em;
         transition: 0.2s ease;
         fill: $midwhite;

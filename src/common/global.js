@@ -1,10 +1,10 @@
 export const colors = {
-  emerald: "#00e5a3", // 1. Verde smeraldo brillante (default / fallback)
-  amber: "#ffd13b", // 2. Giallo oro vivo
-  cyan: "#00b4d8", // 3. Azzurro cyan elettrico
-  coral: "#ff4d6d", // 4. Rosso corallo vivo
-  orange: "#ff851b", // 5. Arancione brillante
-  purple: "#b388ff", // 6. Viola elettrico
+  emerald: "#00e5a3",
+  amber: "#ffd13b",
+  cyan: "#00b4d8",
+  coral: "#ff4d6d",
+  orange: "#ff851b",
+  purple: "#b388ff",
 };
 
 const exports = {

@@ -56,6 +56,13 @@ export function validateDomain(domain, features) {
     shapes: [],
     // Not validated: a plain { eventid: [field, ...] } lookup used for display
     eventSchema: domain && domain.eventSchema ? domain.eventSchema : {},
+    // Not validated: quante sessioni esistono davvero sul server per la
+    // finestra corrente, e se la risposta e' stata troncata. Arrivano dagli
+    // header X-Total-Count / X-Truncated di /api/events e servono a non
+    // spacciare per completo un elenco che non lo e'.
+    eventsTotal:
+      domain && domain.eventsTotal !== undefined ? domain.eventsTotal : null,
+    eventsTruncated: !!(domain && domain.eventsTruncated),
     notifications: domain ? domain.notifications : null,
   };
 

@@ -379,9 +379,17 @@ class Timeline extends React.Component {
     const { activeCategories: categories } = this.props;
 
     const lang = copy[this.props.app.language].timeline;
-    const title = (
-      isSessionMode ? lang.info_sessions || lang.info : lang.info
-    ).replace("%n", domain.eventCountInTimeRange);
+    // Se il server ha troncato la risposta il titolo lo dice: mostrare "5000
+    // sessioni" quando ce ne sono 41.192 farebbe credere che la giornata sia
+    // finita a meta' mattina.
+    const template = domain.eventsTruncated
+      ? lang.info_truncated || lang.info_sessions || lang.info
+      : isSessionMode
+      ? lang.info_sessions || lang.info
+      : lang.info;
+    const title = template
+      .replace("%n", domain.eventCountInTimeRange)
+      .replace("%t", domain.eventsTotal);
 
     return (
       <div
@@ -495,6 +503,8 @@ function mapStateToProps(state) {
     domain: {
       events: selectors.selectTimelineEvents(state),
       eventCountInTimeRange: selectors.selectEventCountInTimeRange(state),
+      eventsTotal: state.domain.eventsTotal,
+      eventsTruncated: state.domain.eventsTruncated,
       projects: selectors.selectProjects(state),
       narratives: state.domain.narratives,
     },

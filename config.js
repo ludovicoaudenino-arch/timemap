@@ -27,8 +27,18 @@ module.exports = {
         dimensions: {
           // Track labels are full Cowrie eventids, so the y axis needs room.
           marginLeft: 80,
-          width_controls: 20
-        }
+          // Fascia a destra riservata al selettore del livello di dettaglio.
+          width_controls: 92
+        },
+        // I livelli del drill-down. `duration` e' l'ampiezza della finestra in
+        // minuti; l'etichetta dice come si leggono i dati a quell'ampiezza.
+        // Il backend sceglie la stessa grana in /api/histogram.
+        zoomLevels: [
+          { label: 'Giorni', duration: 175680 },
+          { label: 'Ore', duration: 1440 },
+          { label: '10 minuti', duration: 60 },
+          { label: 'Sessioni', duration: 10 }
+        ]
       }
     },
     ui: {

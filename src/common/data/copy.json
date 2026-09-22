@@ -106,6 +106,7 @@
       ],
       "info": "%n eventos ocurridos entre",
       "info_sessions": "Seeing %n attack sessions that occurred between",
+      "info_truncated": "Showing only %n of %t attack sessions that occurred between",
       "default_categories_label": "Eventos"
     },
     "cardstack": {
@@ -218,6 +219,7 @@
       "labels_title": "Testimonies",
       "info": "Seeing %n events that occurred between",
       "info_sessions": "Seeing %n attack sessions that occurred between",
+      "info_truncated": "Showing only %n of %t attack sessions that occurred between",
       "default_categories_label": "Events"
     },
     "cardstack": {

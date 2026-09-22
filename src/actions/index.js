@@ -208,18 +208,33 @@ export function fetchEvents(timerange) {
             if (!response.ok) {
               throw new Error(`HTTP error ${response.status}`);
             }
-            return response.json();
+            // Quante sessioni esistono davvero nella finestra, e se il server
+            // ha dovuto troncare la risposta: senza questi due numeri una
+            // giornata affollata sembrerebbe semplicemente finire prima.
+            const total = Number(response.headers.get("X-Total-Count"));
+            return response.json().then((payload) => ({
+              payload,
+              total: Number.isFinite(total) ? total : null,
+              truncated: response.headers.get("X-Truncated") === "true",
+            }));
           })
-          .then((payload) =>
-            isSessionKeyedExport(payload) ? sessionsToEvents(payload) : payload
-          )
+          .then(({ payload, total, truncated }) => ({
+            events: isSessionKeyedExport(payload)
+              ? sessionsToEvents(payload)
+              : payload,
+            total,
+            truncated,
+          }))
           .catch((err) => {
             console.error("Failed to fetch events for timerange:", err);
-            return [];
+            return { events: [], total: null, truncated: false };
           });
       })
     ).then((results) => {
-      const events = results.flatMap((t) => t);
+      const events = results.flatMap((result) => result.events);
+      const totals = results
+        .map((result) => result.total)
+        .filter((total) => total !== null);
       const currentDomain = getState().domain;
       const features = getState().features;
       dispatch(
@@ -227,6 +242,10 @@ export function fetchEvents(timerange) {
           domain: {
             ...currentDomain,
             events,
+            eventsTotal: totals.length
+              ? totals.reduce((sum, total) => sum + total, 0)
+              : null,
+            eventsTruncated: results.some((result) => result.truncated),
           },
           features,
         })
